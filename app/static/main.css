@@ -1,0 +1,78 @@
+body {
+	font-family: 'Helvetica';
+}
+
+h1 {
+	position: relative;
+	display: block;
+	margin-left: 20px !important;
+	color: #FF0066;
+}
+
+h4 {
+	color: #8C8C8C;
+}
+
+#link-list-attributes {
+	display: block;
+	width: 50%;
+	margin-right: auto;
+	margin-left: auto;
+}
+#link-list {
+	display: block;
+	width: 50%;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.btn {
+	border: 1px solid #FF0066;
+	color: white;
+	background-color: #FF0066;;
+}
+
+ul {
+	display: block;
+	padding: 0;
+}
+ul li {
+	list-style-type: none;
+}
+
+.link {
+	height: 50px;
+}
+
+.link p, i {
+	position: relative;
+	margin-left: 10px;
+	display: inline-block;
+	background-color:rgba(178, 178, 178, 0.15);
+	padding: 10px;
+	color: #8C8C8C;
+}
+
+.link i {
+	cursor: hand;
+}
+
+.link i.fa-times {
+	position: relative;
+	float: right;
+	margin-right: 4px; 
+	margin-top: 2px;
+}
+
+.link .artist-name {
+}
+
+.link .song-name {
+}
+
+.link .song-url {
+}
+
+.font-weight {
+	font-weight: 300;
+}
