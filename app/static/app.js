@@ -4,8 +4,7 @@
 * Description
 */
 angular.module('hrtBeatApp', [])
-	.factory('requestService', ['$http', '$q', function($http, $q) {
-		var def = $q.defer();
+	.factory('requestService', ['$http', function($http) {
 		return {
 			getLinkListAccessKey: function() {
 				return $('body').attr('data-link-list-access-key');
