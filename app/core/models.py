@@ -29,21 +29,21 @@ class LinkList(db.Model):
 class Link(db.Model):
 	__tablename__ = 'link'
 	id = db.Column(db.Integer, primary_key=True)
-	artist_name = db.Column(db.String(100))
-	song_name = db.Column(db.String(200))
+	song_artist = db.Column(db.String(100))
+	song_title = db.Column(db.String(200))
 	song_url = db.Column(db.Text)
 	song_provider = db.Column(db.Text)
 	link_list_id = db.Column(db.Integer, db.ForeignKey('link_list.id'))
 
-	def __init__(self, artist_name, song_name, song_url, song_provider, link_list_id):
-		self.artist_name = artist_name
-		self.song_name = song_name
+	def __init__(self, song_artist, song_title, song_url, song_provider, link_list_id):
+		self.song_artist = song_artist
+		self.song_title = song_title
 		self.song_url = song_url
 		self.song_provider = song_provider
 		self.link_list_id = link_list_id
 
 	def getLinkData(self):
-		return {'artistName' : self.artist_name, 'songName' : self.song_name, 'songUrl' : self.song_url, 'songProvider' : self.song_provider, 'linkId': self.id, 'linkListId' : self.link_list_id}
+		return {'songArtist' : self.song_artist, 'songTitle' : self.song_title, 'songUrl' : self.song_url, 'songProvider' : self.song_provider, 'linkId': self.id, 'linkListId' : self.link_list_id}
 
 class Subscriber(db.Model):
 	__tablename__ = 'link_list_subscriber'

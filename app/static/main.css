@@ -11,6 +11,17 @@ h1 {
 
 h4 {
 	color: #8C8C8C;
+	font-weight: 500;
+	font-size: large;
+}
+
+input[type="text"] {
+	border-width: 1px;
+	border-style: solid;
+	border-color: rgba(178, 178, 178, 0.3);
+	height: 30px;
+	font-weight: 300;
+	padding: 10px;
 }
 
 #link-list-attributes {
@@ -27,9 +38,13 @@ h4 {
 }
 
 .btn {
-	border: 1px solid #FF0066;
+	border: none;
 	color: white;
-	background-color: #FF0066;;
+	background-color: #FF0066;
+	position: relative;
+	height: 30px;
+	top: -1px;
+	font-weight: 300;
 }
 
 ul {
@@ -44,17 +59,26 @@ ul li {
 	height: 50px;
 }
 
-.link p, i {
+.link p {
 	position: relative;
 	margin-left: 10px;
 	display: inline-block;
 	background-color:rgba(178, 178, 178, 0.15);
 	padding: 10px;
 	color: #8C8C8C;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.link p:hover {
+	background-color: #8C8C8C;
+	color: white;
 }
 
 .link i {
 	cursor: hand;
+	margin-top: 2px;
 }
 
 .link i.fa-times {
@@ -71,6 +95,7 @@ ul li {
 }
 
 .link .song-url {
+	max-width: 300px;
 }
 
 .font-weight {

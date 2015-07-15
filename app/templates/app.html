@@ -4,24 +4,24 @@
 		<div id="link-list-attributes" ng-controller="LinkListAttributesController as linkListAttributes">
 			<h4 contenteditable=true>{{linkListTitle|angular}}</h4>
 			<form ng-submit="addSubscriber()">
-				<input type="text" ng-model="subscriberEmail" placeholder="Add subscriber">
+				<input type="text" ng-model="subscriberEmail" placeholder="Enter your email address">
 				<input class="btn" type="submit" value="Subscribe">
 			</form>
 		</div>
 		<div id="link-list" ng-controller="LinkListController as linkList">
 			<form ng-submit="addLink()">
-				<input type="text" ng-model="artistName" placeholder="Add artist name">
-				<input type="text" ng-model="songName" placeholder="Add song name">
+				<input type="text" ng-model="songArtist" placeholder="Add artist name">
+				<input type="text" ng-model="songTitle" placeholder="Add song name">
 				<input type="text" ng-model="songUrl" placeholder="Add url here" required>
-				<input class="btn" type="submit" value="Add">
+				<input class="btn" type="submit" value="+">
 			</form>
 			<ul>
 				<li ng-repeat="link in links">
 					<link class="font-weight"
 					linkid="link.linkId" 
 					songurl="link.songUrl"
-					songname="link.songName"
-					artistname="link.artistName"
+					songtitle="link.songTitle"
+					songartist="link.songArtist"
 					></link>
 				</li>
 			</ul>

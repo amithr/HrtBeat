@@ -25,6 +25,10 @@ manager.add_command('db', MigrateCommand)
 # Import core module
 from app.core.controllers import core
 
+# Import provider module
+from app.providers.controllers import providers
+
 # Register blueprints
 app.register_blueprint(core)
+app.register_blueprint(providers)
 

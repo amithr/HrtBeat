@@ -59,7 +59,7 @@ def deleteSubscriber():
 def addLink():
 	data = request.get_json()
 	linkListId = LinkListHelpers.getLinkListIdFromLinkListAccessKey(data["linkListAccessKey"])
-	newLink = Link(artist_name=data["artistName"], song_name=data["songName"], song_url=data["songUrl"], song_provider=data["songProvider"], link_list_id=linkListId)
+	newLink = Link(song_artist=data["songArtist"], song_title=data["songTitle"], song_url=data["songUrl"], song_provider=data["songProvider"], link_list_id=linkListId)
 	Helpers.addObjectToDb(newLink)
 	return jsonify(status=True)
 
@@ -67,8 +67,8 @@ def addLink():
 def updateLink():
 	data = request.get_json()
 	link = Link.query.filter_by(id=data["id"]).first()
-	link.artist_name = data["artistName"]
-	link.song_name = data["songName"]
+	link.song_artist = data["songArtist"]
+	link.song_title = data["songTitle"]
 	link.song_url = data["songUrl"]
 	db.session.commit()
 	return jsonify(status=True)
