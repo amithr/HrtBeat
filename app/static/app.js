@@ -78,11 +78,10 @@ angular.module('hrtBeatApp', [])
 			getDownloadableSongProviders: function() {
 				return ['youtube']
 			},
-			downloadSong: function(mediaUrl, artist, title) {
+			downloadSong: function(link) {
 				var url = '/providers/download/song'
-				var params = {provider: this.getSongProvider(mediaUrl), url: mediaUrl, artist: artist, title: title}
-				requestService.postRequest(url, params, function(data, status) {
-				});
+				var params = {provider: this.getSongProvider(link.songUrl), url: link.songUrl, artist: link.songArtist, title: link.songTitle}
+				requestService.postRequest(url, params, function(data, status) {});
 			}	
 		}
 	}])
@@ -110,13 +109,14 @@ angular.module('hrtBeatApp', [])
 		//Load link list title
 		linkListOperationsService.retrieveLinkList(function(data, status) {
 			$scope.linkListTitle = data.name;
+			$scope.subscriberCount = data.subscriberCount;
 		});
 
 		$scope.addSubscriber = function() {
 			subscriberOperationsService.createSubscriber($scope.subscriberEmail)
 		}
 	}])
-	.controller('LinkListController', ['$scope', 'linkListOperationsService', 'coreOperationsService', 'requestService', function($scope, linkListOperationsService, coreOperationsService, requestService) {
+	.controller('LinkListController', ['$scope', 'linkListOperationsService', 'coreOperationsService', 'providersOperationsService', 'requestService', function($scope, linkListOperationsService, coreOperationsService, providersOperationsService, requestService) {
 		$scope.links = [];
 
 		$scope.refreshLinkList = function() {
@@ -136,7 +136,7 @@ angular.module('hrtBeatApp', [])
 
 		//Add link to db and then refresh link list
 		$scope.addLink = function() {
-			link = {songUrl: $scope.songUrl, songTitle: $scope.songTitle, songArtist: $scope.songArtist, songProvider: providerOperationsService.getSongProvider($scope.songUrl), linkListAccessKey: requestService.getLinkListAccessKey()};
+			link = {songUrl: $scope.songUrl, songTitle: $scope.songTitle, songArtist: $scope.songArtist, songProvider: providersOperationsService.getSongProvider($scope.songUrl), linkListAccessKey: requestService.getLinkListAccessKey()};
 
 			coreOperationsService.createLink(link, function(data, status) {
 				$scope.refreshLinkList();
@@ -155,52 +155,59 @@ angular.module('hrtBeatApp', [])
 				linkid: '=',
 				songurl: '=',
 				songtitle: '=',
-				songartist: '='
+				songartist: '=',
+				clickcount: '=',
+				downloadcount: '='
 			},
 			template: 
 			'<div class="link" data-link-id="{{linkid}}">' +
 				'<p class="song-artist" contenteditable="true">{{songartist}}</p>' +
 				'<p class="song-title" contenteditable="true">{{songtitle}}</p>' +
 				'<p class="song-url" contenteditable="true">{{songurl}}</p>' +
-				'<p><i class="download-link fa fa-download"></i></p>' +
-				'<p><i class="delete-link fa fa-trash"></i></p>' +
+				'<p class="access-link"><a href="{{songurl}}"><i class="fa fa-arrow-right"></i></a><span class="click-count">{{clickcount}}</span></p>' +
+				'<p class="download-link"><i class="fa fa-download"></i><span class="download-count">{{downloadcount}}</span></p>' +
+				'<p class="delete-link"><i class="fa fa-trash"></i></p>' +
 			'</div>'
 			,
 			link: function($scope, $http, element) {
-				$('.link p').off().on('blur', function(e){
-					var $editedFieldLink = $(e.target).parent();
+				function getLinkData($link) {
+					var $linkContainer = $link.parent();
 					var link = {};
-					link.songUrl = $editedFieldLink.find('.song-url').text();
-					link.songTitle = $editedFieldLink.find('.song-title').text();
-					link.songArtist = $editedFieldLink.find('.song-artist').text();
-					link.id = $editedFieldLink.attr('data-link-id');
-					coreOperationsService.updateLink(link, function(data, status){});
+					link.songUrl = $linkContainer.find('.song-url').text();
+					link.songTitle = $linkContainer.find('.song-title').text();
+					link.songArtist = $linkContainer.find('.song-artist').text();
+					link.clickCount = $linkContainer.find('.click-count').text();
+					link.downloadCount = $linkContainer.find('.download-count').text();
+					link.id = $link.attr('data-link-id');
+					return link;
+				}
+
+				$('.link p').off().on('blur', function(e){
+					var $link = $(e.target).parent();
+					coreOperationsService.updateLink(getLinkData($link), function(data, status){});
 					e.preventDefault();
 				});
 
-				$('.link i.delete-link').off().on('click', function(e) {
-					var $editedFieldLink = $(e.target).parent();
+				$('.link p.delete-link').off().on('click', function(e) {
+					var $link = $(e.target).parent();
 					var $linkContainer = $(e.target).parent().parent();
-					var linkId = $editedFieldLink.attr('data-link-id');
+					var linkId = $link.attr('data-link-id');
 					coreOperationsService.deleteLink(linkId, function(data, status){
 						$linkContainer.remove();
 					});
 					e.preventDefault();
 				});
 
-				$('.link i.download-link').off().on('click', function(e) {
-					var $downloadFieldLink = $(e.target).parent();
-					var $linkContainer = $(e.target).parent().parent();
-					var linkId = $downloadFieldLink.attr('data-link-id');
-					var url = $downloadFieldLink.find('.song-url').text();
-					var songArtist = $downloadFieldLink.find('.song-artist').text();
-					var songTitle = $downloadFieldLink.find('.song-title').text();
-					providersOperationsService.downloadSong(url, songArtist, songTitle);
+				$('.link p.download-link').off().on('click', function(e) {
+					var $link = $(e.target).parent().parent();
+					var linkData = getLinkData($link)
+					++$scope.downloadcount;
+					++linkData.downloadCount;
+					providersOperationsService.downloadSong(linkData);
+					coreOperationsService.updateLink(linkData, function(data, status){});
 					e.preventDefault();
 				});
 			}
 		}
 	}]);
-
-
 	;

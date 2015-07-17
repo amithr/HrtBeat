@@ -26,25 +26,41 @@ input[type="text"] {
 
 #link-list-attributes {
 	display: block;
-	width: 50%;
+	width: 60%;
 	margin-right: auto;
 	margin-left: auto;
+	color: #8C8C8C;
 }
+
+#link-list-attributes p {
+	display: inline-block;
+}
+
 #link-list {
 	display: block;
-	width: 50%;
+	width: 60%;
 	margin-right: auto;
 	margin-left: auto;
+	color: #8C8C8C;
 }
 
 .btn {
-	border: none;
-	color: white;
-	background-color: #FF0066;
+	border-width: 1px;
+	border-style: solid;
+	border-color: rgba(178, 178, 178, 0.3);
+	border-radius: 5px;
+	background-color: transparent;
+	color: #FF0066;
 	position: relative;
 	height: 30px;
 	top: -1px;
 	font-weight: 300;
+	margin-right: 8px;
+}
+
+.btn:hover {
+	color: white;
+	background-color: #FF0066;
 }
 
 ul {
@@ -63,22 +79,24 @@ ul li {
 	position: relative;
 	margin-left: 10px;
 	display: inline-block;
-	background-color:rgba(178, 178, 178, 0.15);
 	padding: 10px;
 	color: #8C8C8C;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	border-width: 1px;
+	border-style: solid;
+	border-color: rgba(178, 178, 178, 0.3);
+	border-radius: 5px;
 }
 
 .link p:hover {
-	background-color: #8C8C8C;
-	color: white;
 }
 
 .link i {
 	cursor: hand;
 	margin-top: 2px;
+	color: #8C8C8C;
 }
 
 .link i.fa-times {
@@ -88,6 +106,18 @@ ul li {
 	margin-top: 2px;
 }
 
+.link i.fa-arrow-right {
+	margin-right: 8px;
+}
+
+.link i.fa-hand-o-up {
+	margin-right: 2px;
+}
+
+.link i.fa-download {
+	margin-right: 8px;
+}
+
 .link .artist-name {
 }
 
@@ -95,7 +125,18 @@ ul li {
 }
 
 .link .song-url {
-	max-width: 300px;
+	max-width: 250px;
+}
+
+.access-link {
+	color: #08e004 !important;
+}
+
+.download-link {
+	color: #0aadff!important;
+}
+
+.delete-link {
 }
 
 .font-weight {

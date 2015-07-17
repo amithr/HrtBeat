@@ -17,7 +17,7 @@ def renderApp(link_list_access_key):
 def getLinkList():
 	data = request.get_json()
 	linkList = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]).first()
-	return jsonify(id=linkList.id, name=linkList.name, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), links=linkList.getLinksDataList())
+	return jsonify(id=linkList.id, name=linkList.name, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
 
 @core.route("/create/link-list", methods=['POST'])
 def addLinkList():
@@ -70,6 +70,8 @@ def updateLink():
 	link.song_artist = data["songArtist"]
 	link.song_title = data["songTitle"]
 	link.song_url = data["songUrl"]
+	link.click_count = data["clickCount"]
+	link.download_count = data["downloadCount"]
 	db.session.commit()
 	return jsonify(status=True)
 

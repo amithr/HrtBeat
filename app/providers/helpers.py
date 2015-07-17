@@ -19,7 +19,8 @@ class BaseMediaProvider:
 		return
 	"""youtube_dl package can be used for other providers besides just youtube"""
 	def getYoutubeDlPath(self, songTitle, songId):
-		return '%x-%y.%z' % (songTitle, songId, 'mp3')
+		filename = '-'.join([songTitle, songId])
+		return '.'.join([filename, 'mp3'])
 
 	def getLocalDownloadPath(self, artist, title):
 		if not os.path.exists(self.localDownloadsDirectory):
@@ -46,6 +47,7 @@ class YoutubeProvider(BaseMediaProvider):
 			except OSError:
 				try:
 					result = ydl.extract_info(url, download=True)
+					print result
 					os.rename(self.getYoutubeDlPath(result['title'], result['id']), localDownloadPath)
 				except Exception as e:
 					print "Can't download audio! %s\n" % traceback.format_exc()

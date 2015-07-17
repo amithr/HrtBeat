@@ -1,4 +1,5 @@
 from app import db
+from app.core.models import LinkList
 
 class Helpers():
 	@staticmethod
