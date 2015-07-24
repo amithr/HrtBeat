@@ -22,13 +22,24 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
+# Setup security
+from app.auth.models import User, Role
+from flask.ext.security import Security, SQLAlchemyUserDatastore
+userDatastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, userDatastore)
+
+
 # Import core module
 from app.core.controllers import core
 
 # Import provider module
 from app.providers.controllers import providers
 
+# Import authentication/security module
+from app.auth.controllers import auth
+
 # Register blueprints
 app.register_blueprint(core)
 app.register_blueprint(providers)
+app.register_blueprint(auth)
 

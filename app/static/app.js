@@ -9,9 +9,23 @@ angular.module('hrtBeatApp', [])
 			getLinkListAccessKey: function() {
 				return $('body').attr('data-link-list-access-key');
 			},
+			setAuthenticationToken: function(authenticationToken) {
+				$.cookie('authenticationToken', authenticationToken);
+			},
+			getAuthenticationToken: function() {
+				return $.cookie('authenticationToken');
+			},
 			postRequest: function(url, params, errorMsg, callback) {
 				params.cache = false;
-				$http.post(url, params)
+				var req = {
+					 method: 'POST',
+					 url: url,
+					 headers: {
+					   'Authentication-Token:': this.getAuthenticationToken()
+					 },
+					 data: params
+				}
+				$http(req)
 					.success(function(data, status){
 						callback(data, status);
 					})
@@ -81,7 +95,8 @@ angular.module('hrtBeatApp', [])
 			downloadSong: function(link) {
 				var url = '/providers/download/song'
 				var params = {provider: this.getSongProvider(link.songUrl), url: link.songUrl, artist: link.songArtist, title: link.songTitle}
-				requestService.postRequest(url, params, function(data, status) {});
+				errorMsg = 'Could not download song.'
+				requestService.postRequest(url, params, errorMsg, function(data, status) {});
 			}	
 		}
 	}])
@@ -105,7 +120,36 @@ angular.module('hrtBeatApp', [])
 			}
 		}
 	}])
-	.controller('LinkListAttributesController', ['$scope', 'linkListOperationsService', 'subscriberOperationsService', function($scope, linkListOperationsService, subscriberOperationsService) {
+	.factory('validationService', ['requestService', function(requestService) {
+		return {
+			isEmailAddressValid: function(emailAddress) {
+				var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+    			return pattern.test(emailAddress);
+			},
+			isLinkUrlValid: function(linkUrl) {
+			},
+			isPasswordValid: function(password) {
+				var pattern = new RegExp(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/);
+    			return pattern.test(password);
+			},
+			showErrorFlashMessage: function(message) {
+
+			},
+			showSuccessFlashMessage: function(message) {
+
+			}
+		}
+	}])
+	.factory('loginService', ['requestService', function(requestService) {
+		return {
+			loginUser: function(params, callback) {
+				requestServce.postRequest('/auth/login', params, errorMsg, function(data, status) {
+					callback(data, status);
+				});
+			}
+		}
+	}])
+	.controller('LinkListAttributesController', ['$scope', 'validationService', 'linkListOperationsService', 'subscriberOperationsService', function($scope, validationService, linkListOperationsService, subscriberOperationsService) {
 		//Load link list title
 		linkListOperationsService.retrieveLinkList(function(data, status) {
 			$scope.linkListTitle = data.name;
@@ -113,10 +157,31 @@ angular.module('hrtBeatApp', [])
 		});
 
 		$scope.addSubscriber = function() {
-			subscriberOperationsService.createSubscriber($scope.subscriberEmail)
+			if($scope.subscriberEmail && validationService.isEmailAddressValid($scope.subscriberEmail)) {
+				subscriberOperationsService.createSubscriber($scope.subscriberEmail)
+			} else {
+				console.log()
+			}
 		}
 	}])
-	.controller('LinkListController', ['$scope', 'linkListOperationsService', 'coreOperationsService', 'providersOperationsService', 'requestService', function($scope, linkListOperationsService, coreOperationsService, providersOperationsService, requestService) {
+	.controller('SelectPlaylistController', ['$scope', function($scope) {
+		
+	}])
+	.controller('LoginController', ['$scope', 'requestService', 'loginService', 'validationService', function($scope, requestService, loginService, validationService) {
+		$scope.loginUser = function() {
+			var params = {email: $scope.email, password: $scope.password};
+			if(!params.email || !validationService.isEmailAddressValid(params.email)) {
+				//The form turns red or green?
+			} else if(!params.password || !validationService.isPasswordValid(params.password)) {
+				//The form turns red or green?
+			} else {
+				loginService.loginUser(params, function(data, status) {
+					requestService.setAuthenticationToken('');
+				});
+			}
+		}		
+	}])
+	.controller('LinkListController', ['$scope', 'requestService','linkListOperationsService', 'coreOperationsService', 'providersOperationsService', function($scope, requestService, linkListOperationsService, coreOperationsService, providersOperationsService) {
 		$scope.links = [];
 
 		$scope.refreshLinkList = function() {
@@ -201,7 +266,6 @@ angular.module('hrtBeatApp', [])
 				$('.link p.download-link').off().on('click', function(e) {
 					var $link = $(e.target).parent().parent();
 					var linkData = getLinkData($link)
-					++$scope.downloadcount;
 					++linkData.downloadCount;
 					providersOperationsService.downloadSong(linkData);
 					coreOperationsService.updateLink(linkData, function(data, status){});

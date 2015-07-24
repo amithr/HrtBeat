@@ -12,12 +12,20 @@ DATABASE_CONNECT_OPTIONS = {}
 THREADS_PER_PAGE = 2
 
 # Enable protection against Cross-site Request Forgery (CSRF)
-CSRF_ENABLED = True
+CSRF_ENABLED = False
+WTF_CSRF_ENABLED = False
 
 # Secret key for signing session data
 CSRF_SESSION_KEY = 'secret'
 
 # Secret key for signing cookies
 SECRET_KEY = 'secret'
+
+#Flask-Security parameters
+SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
+SECURITY_TRACKABLE = True
+SECURITY_PASSWORD_SALT = 'sulochana'
+SECURITY_LOGIN_URL = '/auth/login'
+SECURITY_LOGIN_USER_TEMPLATE = 'select.html'
 
 
