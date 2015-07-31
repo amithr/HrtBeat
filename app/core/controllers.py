@@ -5,13 +5,9 @@ from app import db
 
 core = Blueprint('core', __name__, url_prefix='/core')
 
-@core.route("/select/list")
-def selectList():
-	return render_template('select.html')
-
-@core.route("/<link_list_access_key>")
-def renderApp(link_list_access_key):
-	return render_template('app.html', linkListAccessKey=link_list_access_key)
+@core.route("/")
+def getApp():
+	return render_template('app.html')
 
 @core.route("/retrieve/link-list", methods=['POST'])
 def getLinkList():

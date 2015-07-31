@@ -3,12 +3,24 @@
 *
 * Description
 */
-angular.module('hrtBeatApp', [])
+angular.module('hrtBeatApp', ['ngRoute'])
+	.config(function($routeProvider) {
+		$routeProvider
+			.when('/', {
+				templateUrl: '/static/partials/login.html',
+				controller: 'LoginController'
+			})
+			.when('/list/:linkListAccessKey', {
+				templateUrl: '/static/partials/list.html',
+				controller: 'LinkListController'
+			})
+			.when('/select', {
+				templateUrl: '/static/partials/select.html',
+				controller: 'SelectPlaylistController'
+			})
+	})
 	.factory('requestService', ['$http', function($http) {
 		return {
-			getLinkListAccessKey: function() {
-				return $('body').attr('data-link-list-access-key');
-			},
 			setAuthenticationToken: function(authenticationToken) {
 				$.cookie('authenticationToken', authenticationToken);
 			},
@@ -35,11 +47,21 @@ angular.module('hrtBeatApp', [])
 			}
 		}
 	}])
+	.factory('assetsService', ['requestService', function(requestService){
+		return {
+			addFontAwesomeStylesheet: function() {
+				$("head").append($("<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' />"));
+			},
+			addMainStylesheet: function () {
+				$("head").append($("<link rel='stylesheet' href='/static/main.css' type='text/css' media='screen' />"));
+			}
+		}
+	}])
 	.factory('linkListOperationsService', ['requestService', function(requestService) {
 		return {
-			retrieveLinkList: function(callback) {
+			retrieveLinkList: function(linkListAccessKey, callback) {
 				var url = '/core/retrieve/link-list';
-				var params = {linkListAccessKey: requestService.getLinkListAccessKey()};
+				var params = {linkListAccessKey: linkListAccessKey};
 				var errorMsg = 'Failed to get link list.';
 				requestService.postRequest(url, params, errorMsg, function(data, status) {
 					callback(data, status);
@@ -143,7 +165,9 @@ angular.module('hrtBeatApp', [])
 	.factory('loginService', ['requestService', function(requestService) {
 		return {
 			loginUser: function(params, callback) {
-				requestServce.postRequest('/auth/login', params, errorMsg, function(data, status) {
+				url = '/login';
+				errorMsg = 'Could not login user';
+				requestService.postRequest(url, params, errorMsg, function(data, status) {
 					callback(data, status);
 				});
 			}
@@ -164,33 +188,52 @@ angular.module('hrtBeatApp', [])
 			}
 		}
 	}])
-	.controller('SelectPlaylistController', ['$scope', function($scope) {
-		
+	.controller('SelectPlaylistController', ['$location', '$scope', 'assetsService', function($location, $scope, assetsService) {
+		assetsService.addMainStylesheet();
+
+		$scope.selectPlaylist = function() {
+			var playlistPath = '/list/' + $scope.linkListAccessKey
+			$location.path(playlistPath)
+		}
 	}])
-	.controller('LoginController', ['$scope', 'requestService', 'loginService', 'validationService', function($scope, requestService, loginService, validationService) {
+	.controller('LoginController', ['$scope', '$location', 'requestService', 'assetsService','loginService', 'validationService', function($scope, $location, requestService, assetsService, loginService, validationService) {
+		assetsService.addMainStylesheet();
+
 		$scope.loginUser = function() {
 			var params = {email: $scope.email, password: $scope.password};
 			if(!params.email || !validationService.isEmailAddressValid(params.email)) {
 				//The form turns red or green?
-			} else if(!params.password || !validationService.isPasswordValid(params.password)) {
+			} else if(!params.password) {
 				//The form turns red or green?
 			} else {
+
 				loginService.loginUser(params, function(data, status) {
-					requestService.setAuthenticationToken('');
+					console.log(data);
+					if(data.response.user) {
+						requestService.setAuthenticationToken(data.response.user.authentication_token);
+						$location.path('/select');
+					} else {
+						
+					}
 				});
 			}
 		}		
 	}])
-	.controller('LinkListController', ['$scope', 'requestService','linkListOperationsService', 'coreOperationsService', 'providersOperationsService', function($scope, requestService, linkListOperationsService, coreOperationsService, providersOperationsService) {
+	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'coreOperationsService', 'providersOperationsService', function($scope, $routeParams, 
+																																			requestService, assetsService, linkListOperationsService, coreOperationsService, 
+																																			providersOperationsService) {
+		
 		$scope.links = [];
+		assetsService.addFontAwesomeStylesheet();
+		assetsService.addMainStylesheet();
+		var linkListAccessKey = $routeParams.linkListAccessKey;
 
 		$scope.refreshLinkList = function() {
-			$("head").append($("<link rel='stylesheet' href='/static/main.css' type='text/css' media='screen' />"));
-			$("head").append($("<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' />"));
-			$("head").append($("<link rel='stylesheet' href='http://yui.yahooapis.com/pure/0.6.0/pure-min.css' />"));
+			assetsService.addFontAwesomeStylesheet();
+			assetsService.addMainStylesheet();
 			$scope.links = [];
 			//Load all links from db
-			linkListOperationsService.retrieveLinkList(function(data, status) {
+			linkListOperationsService.retrieveLinkList(linkListAccessKey, function(data, status) {
 				for(var i = 0; i < data.links.length; i++) {
 					$scope.links.push(data.links[i]);
 				}
@@ -201,7 +244,7 @@ angular.module('hrtBeatApp', [])
 
 		//Add link to db and then refresh link list
 		$scope.addLink = function() {
-			link = {songUrl: $scope.songUrl, songTitle: $scope.songTitle, songArtist: $scope.songArtist, songProvider: providersOperationsService.getSongProvider($scope.songUrl), linkListAccessKey: requestService.getLinkListAccessKey()};
+			link = {songUrl: $scope.songUrl, songTitle: $scope.songTitle, songArtist: $scope.songArtist, songProvider: providersOperationsService.getSongProvider($scope.songUrl), linkListAccessKey: linkListAccessKey};
 
 			coreOperationsService.createLink(link, function(data, status) {
 				$scope.refreshLinkList();

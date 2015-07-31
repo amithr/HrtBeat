@@ -1,0 +1,20 @@
+<div id="link-list">
+	<form ng-submit="addLink()">
+		<input type="text" ng-model="songArtist" placeholder="Add artist name">
+		<input type="text" ng-model="songTitle" placeholder="Add song name">
+		<input type="text" ng-model="songUrl" placeholder="Add url here" required>
+		<input class="btn" type="submit" value="+">{{links.length}}
+	</form>
+	<ul>
+		<li ng-repeat="link in links">
+			<link class="font-weight"
+			linkid="link.linkId" 
+			songurl="link.songUrl"
+			songtitle="link.songTitle"
+			songartist="link.songArtist"
+			clickcount="link.clickCount"
+			downloadcount="link.downloadCount"
+			></link>
+		</li>
+	</ul>
+</div>

@@ -1,5 +1,5 @@
 body {
-	font-family: 'Helvetica';
+	font-family: 'Helvetica' !important;
 }
 
 h1 {
@@ -22,6 +22,8 @@ input[type="text"] {
 	height: 30px;
 	font-weight: 300;
 	padding: 10px;
+	font-family: Helvetica !important;
+	font-size: 15px !important;
 }
 
 #link-list-attributes {
