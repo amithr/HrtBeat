@@ -7,8 +7,13 @@ from app import db, userDatastore, app
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth.route('/create/user', methods=['POST'])
+@auth_token_required
 def createUser():
-	return
+	ret_dict = {
+        "Key1": "Value1",
+        "Key2": "value2"
+    }
+	return jsonify(items=ret_dict)
 
 @auth.route('/retrieve/user', methods=['POST'])
 def retrieveUser():

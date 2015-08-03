@@ -58,6 +58,8 @@ input[type="text"] {
 	top: -1px;
 	font-weight: 300;
 	margin-right: 8px;
+	font-family: Helvetica !important;
+	font-size: 15px !important;
 }
 
 .btn:hover {

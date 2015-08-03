@@ -18,6 +18,10 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				templateUrl: '/static/partials/select.html',
 				controller: 'SelectPlaylistController'
 			})
+			.when('/register', {
+				templateUrl: '/static/partials/register.html',
+				controller: 'RegisterController'
+			})
 	})
 	.factory('requestService', ['$http', function($http) {
 		return {
@@ -33,7 +37,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					 method: 'POST',
 					 url: url,
 					 headers: {
-					   'Authentication-Token:': this.getAuthenticationToken()
+					   'Authentication-Token': this.getAuthenticationToken()
 					 },
 					 data: params
 				}
@@ -162,15 +166,50 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			}
 		}
 	}])
-	.factory('loginService', ['requestService', function(requestService) {
+	.factory('userService', ['$location', 'requestService', function(requestService) {
 		return {
 			loginUser: function(params, callback) {
-				url = '/login';
-				errorMsg = 'Could not login user';
+				var url = '/login';
+				var errorMsg = 'Could not login user';
 				requestService.postRequest(url, params, errorMsg, function(data, status) {
 					callback(data, status);
 				});
+			},
+			logoutUser: function(params, callback) {
+				var url = '/auth/logout'
+				var errorMsg = 'Could not logout user';
+				requestService.postRequest(url, params, errorMsg, function(data, status) {
+					callback(data, status);
+					requestService.setAuthenticationToken('');
+					$location.path('/');
+				});
+			},
+			isUserLoggedIn: function() {
+				if(requestService.getAuthenticationToken) {
+					return true;
+				} else {
+					return false;
+				}
+			},
+			ensureUserIsLoggedIn: function() {
+				if(!requestService.getAuthenticationToken()) {
+					$location.path('/');
+				}
 			}
+		}
+	}])
+	.controller('HeaderController', ['$scope', 'userService', function($scope, userService) {
+
+		$scope.isUserLoggedIn = userService.isUserLoggedIn();
+
+		$scope.logout = function() {
+			params = {};
+			userService.logoutUser(function(data, status){});
+		}
+	}])
+	.controller('RegisterController', ['$scope', function($scope) {
+		$scope.register = function() {
+
 		}
 	}])
 	.controller('LinkListAttributesController', ['$scope', 'validationService', 'linkListOperationsService', 'subscriberOperationsService', function($scope, validationService, linkListOperationsService, subscriberOperationsService) {
@@ -188,7 +227,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			}
 		}
 	}])
-	.controller('SelectPlaylistController', ['$location', '$scope', 'assetsService', function($location, $scope, assetsService) {
+	.controller('SelectPlaylistController', ['$scope', '$location', 'assetsService', 'userService', function($scope, $location, assetsService, userService) {
 		assetsService.addMainStylesheet();
 
 		$scope.selectPlaylist = function() {
@@ -196,7 +235,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			$location.path(playlistPath)
 		}
 	}])
-	.controller('LoginController', ['$scope', '$location', 'requestService', 'assetsService','loginService', 'validationService', function($scope, $location, requestService, assetsService, loginService, validationService) {
+	.controller('LoginController', ['$scope', '$location', 'requestService', 'assetsService','userService', 'validationService', function($scope, $location, requestService, assetsService, userService, validationService) {
 		assetsService.addMainStylesheet();
 
 		$scope.loginUser = function() {
@@ -206,8 +245,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			} else if(!params.password) {
 				//The form turns red or green?
 			} else {
-
-				loginService.loginUser(params, function(data, status) {
+				userService.loginUser(params, function(data, status) {
 					console.log(data);
 					if(data.response.user) {
 						requestService.setAuthenticationToken(data.response.user.authentication_token);
