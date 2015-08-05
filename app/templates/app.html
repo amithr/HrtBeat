@@ -2,7 +2,7 @@
 	<h1>HrtBeat</h1>
 	<div id="header" ng-controller="HeaderController">
 		<button class="btn" ng-show="isUserLoggedIn" ng-click="logout()">Logout</button>
-		<button class="btn">Register</button>
+		<button class="btn" ng-show="isUserLoggedIn">Register</button>
 	</div>
 	<head>
 		<meta charset="UTF-8">

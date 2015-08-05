@@ -3,13 +3,11 @@ from app import db, manager, migrate
 class LinkList(db.Model):
 	__tablename__ = 'link_list'
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(80), unique=False)
 	link_list_access_key = db.Column(db.String(80), unique=True)
 	links = db.relationship('Link', backref='LinkList')
 	subscribers = db.relationship('Subscriber', backref='LinkList')
 
-	def __init__(self, name, link_list_access_key):
-		self.name = name
+	def __init__(self, link_list_access_key):
 		self.link_list_access_key = link_list_access_key
 
 	def getSubscribersDataList(self):

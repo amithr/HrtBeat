@@ -13,13 +13,16 @@ def getApp():
 def getLinkList():
 	data = request.get_json()
 	linkList = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]).first()
-	return jsonify(id=linkList.id, name=linkList.name, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
+	if not linkList:
+		return jsonify(status=False)
+	else:
+		return jsonify(status=True, id=linkList.id, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
 
 @core.route("/create/link-list", methods=['POST'])
 def addLinkList():
 	data = request.get_json()
-	newLinkList = LinkList(name = data["name"], link_list_access_key = data["linkListAccessKey"])
-	Helpers.addObjectToDb(linkList)
+	newLinkList = LinkList(link_list_access_key = data["linkListAccessKey"])
+	Helpers.addObjectToDb(newLinkList)
 	return jsonify(status=True)
 
 @core.route("/delete/link-list", methods=['POST'])

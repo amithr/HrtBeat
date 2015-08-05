@@ -16,7 +16,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			})
 			.when('/select', {
 				templateUrl: '/static/partials/select.html',
-				controller: 'SelectPlaylistController'
+				controller: 'SelectLinkListController'
 			})
 			.when('/register', {
 				templateUrl: '/static/partials/register.html',
@@ -42,11 +42,11 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					 data: params
 				}
 				$http(req)
-					.success(function(data, status){
-						callback(data, status);
+					.success(function(data) {
+						callback(data);
 					})
-					.error(function(data, status){
-						callback(data, status)
+					.error(function(data) {
+						callback(data)
 					});
 			}
 		}
@@ -56,45 +56,55 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			addFontAwesomeStylesheet: function() {
 				$("head").append($("<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' />"));
 			},
-			addMainStylesheet: function () {
+			addMainStylesheets: function () {
+				$("head").append($("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css' type='text/css' media='screen' />"));
 				$("head").append($("<link rel='stylesheet' href='/static/main.css' type='text/css' media='screen' />"));
 			}
 		}
 	}])
 	.factory('linkListOperationsService', ['requestService', function(requestService) {
 		return {
+			addLinkList: function(linkListAccessKey, callback) {
+				var url = '/core/create/link-list';
+				var params = {linkListAccessKey: linkListAccessKey};
+				var errorMsg = 'Failed to add link list.';
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
+
+				});
+			},
 			retrieveLinkList: function(linkListAccessKey, callback) {
 				var url = '/core/retrieve/link-list';
 				var params = {linkListAccessKey: linkListAccessKey};
 				var errorMsg = 'Failed to get link list.';
-				requestService.postRequest(url, params, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
 				});
 			}
 		}
 	}])
-	.factory('coreOperationsService', ['requestService', function(requestService) {
+	.factory('linkOperationsService', ['requestService', function(requestService) {
 		return {
 			createLink: function(link, callback) {
 				var url = '/core/create/link';
 				var errorMsg = 'Could not create link.';
-				requestService.postRequest(url, link, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, link, errorMsg, function(data) {
+					callback(data);
 				});
 			},
 			updateLink: function(link, callback) {
 				var url = '/core/update/link';
 				var errorMsg = 'Could not update link.';
-				requestService.postRequest(url, link, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, link, errorMsg, function(data) {
+					callback(data);
 				});
 			},
 			deleteLink: function(linkId, callback) {
 				var url = '/core/delete/link';
 				var params = {'id': linkId};
 				var errorMsg = 'Could not delete link.';
-				requestService.postRequest(url, params, errorMsg, function(data, status){
-					callback(data, status);
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
 				});
 			}
 		}
@@ -122,7 +132,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				var url = '/providers/download/song'
 				var params = {provider: this.getSongProvider(link.songUrl), url: link.songUrl, artist: link.songArtist, title: link.songTitle}
 				errorMsg = 'Could not download song.'
-				requestService.postRequest(url, params, errorMsg, function(data, status) {});
+				requestService.postRequest(url, params, errorMsg, function(data) {});
 			}	
 		}
 	}])
@@ -132,16 +142,16 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				var url = '/core/add/subscriber';
 				var params = {email: subscriberEmail, linkListAccessKey: requestService.getLinkListAccessKey()};
 				var errorMsg = 'Could not add subscriber';
-				requestService.postRequest(url, params, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
 				});
 			},
 			deleteSubscriber: function(subscriberId, callback) {
 				var url = '/core/delete/subscriber';
 				var params = {subscriberId: subscriberId, linkListAccessKey: requestService.getLinkListAccessKey()};
 				var errorMsg = 'Could not delete subscriber';
-				requestService.postRequest(url, params, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
 				});
 			}
 		}
@@ -158,6 +168,9 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				var pattern = new RegExp(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/);
     			return pattern.test(password);
 			},
+			isLinkListAccessKeyValid: function(linkListAccessKey) {
+
+			},
 			showErrorFlashMessage: function(message) {
 
 			},
@@ -171,15 +184,15 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			loginUser: function(params, callback) {
 				var url = '/login';
 				var errorMsg = 'Could not login user';
-				requestService.postRequest(url, params, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
 				});
 			},
 			logoutUser: function(params, callback) {
 				var url = '/auth/logout'
 				var errorMsg = 'Could not logout user';
-				requestService.postRequest(url, params, errorMsg, function(data, status) {
-					callback(data, status);
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
 					requestService.setAuthenticationToken('');
 					$location.path('/');
 				});
@@ -204,7 +217,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 
 		$scope.logout = function() {
 			params = {};
-			userService.logoutUser(function(data, status){});
+			userService.logoutUser(function(data){});
 		}
 	}])
 	.controller('RegisterController', ['$scope', function($scope) {
@@ -212,31 +225,37 @@ angular.module('hrtBeatApp', ['ngRoute'])
 
 		}
 	}])
-	.controller('LinkListAttributesController', ['$scope', 'validationService', 'linkListOperationsService', 'subscriberOperationsService', function($scope, validationService, linkListOperationsService, subscriberOperationsService) {
-		//Load link list title
-		linkListOperationsService.retrieveLinkList(function(data, status) {
-			$scope.linkListTitle = data.name;
-			$scope.subscriberCount = data.subscriberCount;
-		});
+	.controller('SelectLinkListController', ['$scope', '$location', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, assetsService, userService, linkListOperationsService) {
+		assetsService.addMainStylesheets();
+		$scope.linkListAccessKeyExists = false;
 
-		$scope.addSubscriber = function() {
-			if($scope.subscriberEmail && validationService.isEmailAddressValid($scope.subscriberEmail)) {
-				subscriberOperationsService.createSubscriber($scope.subscriberEmail)
-			} else {
-				console.log()
+		var validateLinkListKey = function(event) {
+			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
+				if(data.status) {
+					$scope.linkLinkAccessKeyExists = true;
+				}
+			});
+		};
+
+		var redirectToCurrentLinkList = function() {
+			var linkListPath = '/list/' + $scope.linkListAccessKey;
+			$location.path(linkListPath);
+		}
+
+		$scope.selectLinkList = function() {
+			redirectToCurrentLinkList();
+		};
+
+		$scope.addLinkList = function() {
+			if(!$scope.linkListAccessKeyExists) {
+				linkListOperationsService.addLinkList($scope.linkListAccessKey, function(data) {
+					redirectToCurrentLinkList();
+				});
 			}
-		}
-	}])
-	.controller('SelectPlaylistController', ['$scope', '$location', 'assetsService', 'userService', function($scope, $location, assetsService, userService) {
-		assetsService.addMainStylesheet();
-
-		$scope.selectPlaylist = function() {
-			var playlistPath = '/list/' + $scope.linkListAccessKey
-			$location.path(playlistPath)
-		}
+		};
 	}])
 	.controller('LoginController', ['$scope', '$location', 'requestService', 'assetsService','userService', 'validationService', function($scope, $location, requestService, assetsService, userService, validationService) {
-		assetsService.addMainStylesheet();
+		assetsService.addMainStylesheets();
 
 		$scope.loginUser = function() {
 			var params = {email: $scope.email, password: $scope.password};
@@ -245,8 +264,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			} else if(!params.password) {
 				//The form turns red or green?
 			} else {
-				userService.loginUser(params, function(data, status) {
-					console.log(data);
+				userService.loginUser(params, function(data) {
 					if(data.response.user) {
 						requestService.setAuthenticationToken(data.response.user.authentication_token);
 						$location.path('/select');
@@ -257,23 +275,25 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			}
 		}		
 	}])
-	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'coreOperationsService', 'providersOperationsService', function($scope, $routeParams, 
-																																			requestService, assetsService, linkListOperationsService, coreOperationsService, 
+	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', function($scope, $routeParams, 
+																																			requestService, assetsService, linkListOperationsService, linkOperationsService, 
 																																			providersOperationsService) {
 		
 		$scope.links = [];
 		assetsService.addFontAwesomeStylesheet();
-		assetsService.addMainStylesheet();
+		assetsService.addMainStylesheets();
 		var linkListAccessKey = $routeParams.linkListAccessKey;
 
 		$scope.refreshLinkList = function() {
 			assetsService.addFontAwesomeStylesheet();
-			assetsService.addMainStylesheet();
+			assetsService.addMainStylesheets();
 			$scope.links = [];
 			//Load all links from db
-			linkListOperationsService.retrieveLinkList(linkListAccessKey, function(data, status) {
-				for(var i = 0; i < data.links.length; i++) {
-					$scope.links.push(data.links[i]);
+			linkListOperationsService.retrieveLinkList(linkListAccessKey, function(data) {
+				if(data.status) {
+					for(var i = 0; i < data.links.length; i++) {
+						$scope.links.push(data.links[i]);
+					}
 				}
 			});
 		};
@@ -284,7 +304,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 		$scope.addLink = function() {
 			link = {songUrl: $scope.songUrl, songTitle: $scope.songTitle, songArtist: $scope.songArtist, songProvider: providersOperationsService.getSongProvider($scope.songUrl), linkListAccessKey: linkListAccessKey};
 
-			coreOperationsService.createLink(link, function(data, status) {
+			linkOperationsService.createLink(link, function(data) {
 				$scope.refreshLinkList();
 			});
 			
@@ -293,7 +313,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			$scope.songArtist = '';
 		}
 	}])
-	.directive('link', ['coreOperationsService', 'providersOperationsService', function(coreOperationsService, providersOperationsService) {
+	.directive('link', ['linkOperationsService', 'providersOperationsService', function(linkOperationsService, providersOperationsService) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -330,7 +350,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 
 				$('.link p').off().on('blur', function(e){
 					var $link = $(e.target).parent();
-					coreOperationsService.updateLink(getLinkData($link), function(data, status){});
+					linkOperationsService.updateLink(getLinkData($link), function(data){});
 					e.preventDefault();
 				});
 
@@ -338,7 +358,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					var $link = $(e.target).parent();
 					var $linkContainer = $(e.target).parent().parent();
 					var linkId = $link.attr('data-link-id');
-					coreOperationsService.deleteLink(linkId, function(data, status){
+					linkOperationsService.deleteLink(linkId, function(data){
 						$linkContainer.remove();
 					});
 					e.preventDefault();
@@ -349,7 +369,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					var linkData = getLinkData($link)
 					++linkData.downloadCount;
 					providersOperationsService.downloadSong(linkData);
-					coreOperationsService.updateLink(linkData, function(data, status){});
+					linkOperationsService.updateLink(linkData, function(data){});
 					e.preventDefault();
 				});
 			}

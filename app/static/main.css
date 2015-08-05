@@ -15,6 +15,24 @@ h4 {
 	font-size: large;
 }
 
+.small-margin-left {
+	margin-left: 8px !important;
+}
+
+.small-margin-right {
+	margin-right: 8px !important;
+}
+
+.small-margin-top {
+	margin-top: 8px !important;
+}
+
+.small-margin-bottom {
+	margin-bottom: 8px !important;
+}
+
+
+
 input[type="text"] {
 	border-width: 1px;
 	border-style: solid;
@@ -22,8 +40,19 @@ input[type="text"] {
 	height: 30px;
 	font-weight: 300;
 	padding: 10px;
-	font-family: Helvetica !important;
 	font-size: 15px !important;
+}
+
+#login-form {
+	display: block;
+	width: 38%;
+	margin: 0 auto;
+}
+
+#select-playlist {
+	display: block;
+	width: 25%;
+	margin: 0 auto;
 }
 
 #link-list-attributes {
@@ -57,14 +86,18 @@ input[type="text"] {
 	height: 30px;
 	top: -1px;
 	font-weight: 300;
-	margin-right: 8px;
 	font-family: Helvetica !important;
 	font-size: 15px !important;
+	line-height: 1px;
 }
 
 .btn:hover {
 	color: white;
 	background-color: #FF0066;
+}
+
+.add-btn {
+	line-height: 2px !important; 
 }
 
 ul {
