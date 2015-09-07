@@ -357,19 +357,10 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				$('.link p.delete-link').off().on('click', function(e) {
 					var $link = $(e.target).parent();
 					var $linkContainer = $(e.target).parent().parent();
-					var linkId = $link.attr('data-link-id');
+					var linkId = $linkContainer.attr('data-link-id');
 					linkOperationsService.deleteLink(linkId, function(data){
 						$linkContainer.remove();
 					});
-					e.preventDefault();
-				});
-
-				$('.link p.download-link').off().on('click', function(e) {
-					var $link = $(e.target).parent().parent();
-					var linkData = getLinkData($link);
-					++linkData.downloadCount;
-					providersOperationsService.downloadSong(linkData);
-					linkOperationsService.updateLink(linkData, function(data){});
 					e.preventDefault();
 				});
 
@@ -377,7 +368,20 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					var $link = $(e.target).parent().parent();
 					var linkData = getLinkData($link);
 					++linkData.clickCount;
-					console.log(linkData);
+					$scope.$apply(function() {
+						++$scope.clickcount;
+					});
+					linkOperationsService.updateLink(linkData, function(data){});
+				});
+
+				$('.link p.download-link').off().on('click', function(e) {
+					var $link = $(e.target).parent();
+					var linkData = getLinkData($link);
+					++linkData.downloadCount;
+					$scope.$apply(function() {
+						++$scope.downloadcount;
+					});
+					providersOperationsService.downloadSong(linkData);
 					linkOperationsService.updateLink(linkData, function(data){});
 					e.preventDefault();
 				});
