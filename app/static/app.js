@@ -330,7 +330,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				'<p class="song-artist" contenteditable="true">{{songartist}}</p>' +
 				'<p class="song-title" contenteditable="true">{{songtitle}}</p>' +
 				'<p class="song-url" contenteditable="true">{{songurl}}</p>' +
-				'<p class="access-link"><a href="{{songurl}}"><i class="fa fa-arrow-right"></i></a><span class="click-count">{{clickcount}}</span></p>' +
+				'<p class="access-link"><a href="{{songurl}}" target="_blank"><i class="fa fa-arrow-right"></i></a><span class="click-count">{{clickcount}}</span></p>' +
 				'<p class="download-link"><i class="fa fa-download"></i><span class="download-count">{{downloadcount}}</span></p>' +
 				'<p class="delete-link"><i class="fa fa-trash"></i></p>' +
 			'</div>'
@@ -344,7 +344,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					link.songArtist = $linkContainer.find('.song-artist').text();
 					link.clickCount = $linkContainer.find('.click-count').text();
 					link.downloadCount = $linkContainer.find('.download-count').text();
-					link.id = $link.attr('data-link-id');
+					link.id = $linkContainer.attr('data-link-id');
 					return link;
 				}
 
@@ -366,9 +366,18 @@ angular.module('hrtBeatApp', ['ngRoute'])
 
 				$('.link p.download-link').off().on('click', function(e) {
 					var $link = $(e.target).parent().parent();
-					var linkData = getLinkData($link)
+					var linkData = getLinkData($link);
 					++linkData.downloadCount;
 					providersOperationsService.downloadSong(linkData);
+					linkOperationsService.updateLink(linkData, function(data){});
+					e.preventDefault();
+				});
+
+				$('.link p.access-link').off().on('click', function(e) {
+					var $link = $(e.target).parent().parent();
+					var linkData = getLinkData($link);
+					++linkData.clickCount;
+					console.log(linkData);
 					linkOperationsService.updateLink(linkData, function(data){});
 					e.preventDefault();
 				});
