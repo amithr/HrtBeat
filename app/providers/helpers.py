@@ -32,6 +32,7 @@ class YoutubeProvider(BaseMediaProvider):
 	def downloadSong(self, url, artist, title):
 		ydl_opts = {
 			'format': 'bestaudio/best',
+			'outtmpl': 'downloads/%(id)s.%(ext)s',
 			'postprocessors': [{
 				'key': 'FFmpegExtractAudio',
 				'preferredcodec': 'mp3',
@@ -47,8 +48,6 @@ class YoutubeProvider(BaseMediaProvider):
 			except OSError:
 				try:
 					result = ydl.extract_info(url, download=True)
-					print result
-					os.rename(self.getYoutubeDlPath(result['title'], result['id']), localDownloadPath)
 				except Exception as e:
 					print "Can't download audio! %s\n" % traceback.format_exc()
 		return
