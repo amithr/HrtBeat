@@ -17,10 +17,6 @@ class BaseMediaProvider:
 	def getSongData(self, url):
 		"""Get song metadata"""
 		return
-	"""youtube_dl package can be used for other providers besides just youtube"""
-	def getYoutubeDlPath(self, songTitle, songId):
-		filename = '-'.join([songTitle, songId])
-		return '.'.join([filename, 'mp3'])
 
 	def getLocalDownloadPath(self, artist, title):
 		if not os.path.exists(self.localDownloadsDirectory):

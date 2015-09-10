@@ -26,4 +26,8 @@ SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
 SECURITY_TRACKABLE = True
 SECURITY_PASSWORD_SALT = 'sulochana'
 
+#Google API Keys
+GOOGLE_CONSUMER_KEY = '81957407594-cvfrc6gpd35f29nkgmn4lqgb8adlausk.apps.googleusercontent.com'
+GOOGLE_CONSUMER_SECRET = '5DcaOj-FsdKUUvIrcVNc8SdV'
+
 

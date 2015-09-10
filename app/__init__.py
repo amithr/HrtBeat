@@ -42,4 +42,3 @@ from app.auth.controllers import auth
 app.register_blueprint(core)
 app.register_blueprint(providers)
 app.register_blueprint(auth)
-
