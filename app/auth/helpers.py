@@ -3,22 +3,24 @@ from abc import abstractmethod
 from app import app
 
 class BaseAuthenticationProvider:
-	client_id = app.config['GOOGLE_CONSUMER_KEY']
-	client_secret = app.config['GOOGLE_CONSUMER_SECRET']
-
 	@abstractmethod
-	def constructAuthorizationCodeRequestUrl(self, clientId):
+	def constructAuthorizationCodeRequestUrl(self):
 		return
 
 	@abstractmethod
-	def getAuthorizationCode(self, requestUrl):
+	def getAuthorizationCode(self, authorizationCodeRequestUrl):
 		return
 
 	@abstractmethod
-	def constructAccessTokenRequestUrl(self, code, clientId, clientSecret):
+	def constructAccessTokenRequestUrl(self, code):
+		return
 
 	@abstractmethod
-	def validateAccessToken(self, token):
+	def getAccessToken(self, accessTokenRequestUrl):
+		return
+
+	@abstractmethod
+	def constructServiceRequestUrl(self, accessToken):
 		return
 
 	@abstractmethod
@@ -26,26 +28,36 @@ class BaseAuthenticationProvider:
 		return
 
 class GoogleAuthenticationProvider(BaseAuthenticationProvider):
-	def constructRequestUrl(self, client_id):
+	def constructAuthorizationCodeRequestUrl(self):
 		baseUrl = 'https://accounts.google.com/o/oauth2/auth?'
 		scope = 'email+profile'
 		state = '/core'
 		redirect_uri = 'http://localhost:5000/auth/oauth2/callback'
 		response_type = 'code'
-		constructedUrl = baseUrl + '&scope=' + scope + '&state=' + state + '&redirect_uri=' + redirect_uri + '&response_type=' + response_type + '&client_id=' + self.client_id
+		constructedUrl = baseUrl + '&scope=' + scope + '&state=' + state + '&redirect_uri=' + redirect_uri + '&response_type=' + response_type + '&client_id=' + app.config['GOOGLE_CONSUMER_KEY']
 		return constructedUrl
 
-	def getAccessToken(self, requestUrl):
-		response = requests.post(requestUrl)
+	def getAuthorizationCode(self, authorizationCodeRequestUrl):
+		response = requests.post(authorizationCodeRequestUrl)
 		return response
 
-	def constructAccessTokenRequestUrl(self, code)
+	def constructAccessTokenRequestUrl(self, code):
+		baseUrl = 'https://www.googleapis.com/oauth2/v3/token?'
+		redirect_uri= 'http://localhost:5000/auth/oauth2/access-token-callback'
+		grant_type = 'authorization_code'
+		constructedUrl = baseUrl + '&code=' + code + '&client_id' + app.config['GOOGLE_CONSUMER_KEY'] + '&client_secret' + 
+		app.config['GOOGLE_CONSUMER_SECRET'] + '&redirect_uri' + redirect_uri + '&grant_type' + grant_type
+		return constructedUrl
 
-	def validateAccessToken(self, token):
-		requestUrl = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + token;
-		response = request.post(requestUrl)
+	def getAccessToken(self, accessTokenRequestUrl):
+		response = requests.post(accessTokenRequestUrl)
+		return response
 
-	def getUserData(self):
-		requestUrl = ''
-		response = request.post(requestUrl)
+	def constructServiceRequestUrl(self, accessToken):
+		baseUrl = 'https://www.googleapis.com/plus/v1/people/me?'
+		constructedUrl = baseUrl + '&access_token' + accessToken
+		return constructedUrl
+
+	def getUserData(self, serviceRequestUrl):
+		response = request.post(serviceRequestUrl)
 		return response
