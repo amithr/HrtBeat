@@ -28,13 +28,18 @@ class BaseAuthenticationProvider:
 		return
 
 class GoogleAuthenticationProvider(BaseAuthenticationProvider):
+	redirect_uri = 'http://localhost:5000/auth/oauth2/callback'
+
+	client_id = app.config['GOOGLE_CONSUMER_KEY']
+
+	client_secret = app.config['GOOGLE_CONSUMER_SECRET']
+
 	def constructAuthorizationCodeRequestUrl(self):
 		baseUrl = 'https://accounts.google.com/o/oauth2/auth?'
 		scope = 'email+profile'
 		state = '/core'
-		redirect_uri = 'http://localhost:5000/auth/oauth2/callback'
 		response_type = 'code'
-		constructedUrl = baseUrl + '&scope=' + scope + '&state=' + state + '&redirect_uri=' + redirect_uri + '&response_type=' + response_type + '&client_id=' + app.config['GOOGLE_CONSUMER_KEY']
+		constructedUrl = baseUrl + '&scope=' + scope + '&state=' + state + '&redirect_uri=' + self.redirect_uri + '&response_type=' + response_type + '&client_id=' + self.client_id
 		return constructedUrl
 
 	def getAuthorizationCode(self, authorizationCodeRequestUrl):
@@ -43,10 +48,9 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 
 	def constructAccessTokenRequestUrl(self, code):
 		baseUrl = 'https://www.googleapis.com/oauth2/v3/token?'
-		redirect_uri= 'http://localhost:5000/auth/oauth2/access-token-callback'
+		redirect_uri= 'http://localhost:5000/auth/oauth2/callback'
 		grant_type = 'authorization_code'
-		constructedUrl = baseUrl + '&code=' + code + '&client_id' + app.config['GOOGLE_CONSUMER_KEY'] + '&client_secret' + 
-		app.config['GOOGLE_CONSUMER_SECRET'] + '&redirect_uri' + redirect_uri + '&grant_type' + grant_type
+		constructedUrl = baseUrl + '&code=' + code + '&client_id=' + self.client_id + '&client_secret=' + self.client_secret + '&redirect_uri=' + self.redirect_uri + '&grant_type=' + grant_type
 		return constructedUrl
 
 	def getAccessToken(self, accessTokenRequestUrl):
@@ -55,9 +59,9 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 
 	def constructServiceRequestUrl(self, accessToken):
 		baseUrl = 'https://www.googleapis.com/plus/v1/people/me?'
-		constructedUrl = baseUrl + '&access_token' + accessToken
+		constructedUrl = baseUrl + '&access_token=' + accessToken
 		return constructedUrl
 
 	def getUserData(self, serviceRequestUrl):
-		response = request.post(serviceRequestUrl)
+		response = requests.post(serviceRequestUrl)
 		return response

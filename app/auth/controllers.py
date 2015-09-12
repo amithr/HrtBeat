@@ -17,16 +17,17 @@ def createOrLoginUser():
 	return jsonify(items=ret_dict)
 
 @auth.route('/request/access-key', methods=['POST', 'GET'])
-def requestGoogleApiAccessKey():
-	clientId = app.config['GOOGLE_CONSUMER_KEY']
-	requestUrl = GoogleAuthenticationProvider().constructRequestUrl(clientId)
-	accessToken = GoogleAuthenticationProvider().getAccessToken(requestUrl)
+def requestApiAccessKey():
+	requestUrl = GoogleAuthenticationProvider().constructAuthorizationCodeRequestUrl()
+	GoogleAuthenticationProvider().getAuthorizationCode(requestUrl)
 	return str(requestUrl)
 
-@auth.route('/oauth2/callback', methods=['GET'])
-def receivedCallbackData():
+@auth.route('/oauth2/callback', methods=['POST', 'GET'])
+def receiveAuthorizationCode():
 	code = request.args.get('code')
-	return str(code)
+	requestUrl = GoogleAuthenticationProvider().constructAccessTokenRequestUrl(code)
+	response = GoogleAuthenticationProvider().getAccessToken(requestUrl)
+	return str(response.content)
 
 @auth.route('/retrieve/user', methods=['POST'])
 def retrieveUser():
