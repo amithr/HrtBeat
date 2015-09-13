@@ -12,9 +12,10 @@ class BaseAuthenticationProvider:
 	def constructAccessTokenRequestUrl(self, code):
 		return
 
-	@abstractmethod
 	def getAccessToken(self, accessTokenRequestUrl):
-		return
+		response = requests.post(accessTokenRequestUrl)
+		decodedResponse = json.loads(response.content)
+		return decodedResponse["access_token"]
 
 	def storeAccessToken(self, accessToken):
 		return
@@ -46,13 +47,6 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 		baseUrl = 'https://www.googleapis.com/oauth2/v3/token?'
 		grant_type = 'authorization_code'
 		constructedUrl = baseUrl + '&code=' + code + '&client_id=' + self.client_id + '&client_secret=' + self.client_secret + '&redirect_uri=' + self.redirect_uri + '&grant_type=' + grant_type
-		return constructedUrl
-
-	def getAccessToken(self, accessTokenRequestUrl):
-		response = requests.post(accessTokenRequestUrl)
-		print decodedResponse
-		decodedResponse = json.load(response.content)
-		return decodedResponse["access_token"]
 
 	def storeAccessToken(self, accessToken):
 		return
@@ -83,10 +77,6 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 		baseUrl = 'https://graph.facebook.com/v2.3/oauth/access_token?'
 		constructedUrl = baseUrl + 'client_id=' + self.client_id + '&redirect_uri=' + self.redirect_uri + '&client_secret=' + self.client_secret + '&code=' + code
 		return constructedUrl
-
-	def getAccessToken(self, accessTokenRequestUrl):
-		response = requests.post(accessTokenRequestUrl)
-		return response
 
 	def storeAccessToken(self, accessToken):
 		return
