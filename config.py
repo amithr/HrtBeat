@@ -27,7 +27,11 @@ SECURITY_TRACKABLE = True
 SECURITY_PASSWORD_SALT = 'sulochana'
 
 #Google API Keys
-GOOGLE_CONSUMER_KEY = '81957407594-cvfrc6gpd35f29nkgmn4lqgb8adlausk.apps.googleusercontent.com'
-GOOGLE_CONSUMER_SECRET = '5DcaOj-FsdKUUvIrcVNc8SdV'
+GOOGLE_CLIENT_ID = '81957407594-cvfrc6gpd35f29nkgmn4lqgb8adlausk.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '5DcaOj-FsdKUUvIrcVNc8SdV'
+
+#Facebook API Keys
+FACEBOOK_CLIENT_ID = '1681075138775381'
+FACEBOOK_CLIENT_SECRET = '516c9bd0bd9c6196a5befe1aaa39973b'
 
 

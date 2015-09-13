@@ -1,7 +1,7 @@
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, render_template, jsonify, redirect
 from flask_security import auth_token_required, current_user, logout_user
 from app.auth.models import User, Role
-from app.auth.helpers import GoogleAuthenticationProvider
+from app.auth.helpers import GoogleAuthenticationProvider, FacebookAuthenticationProvider
 from app.core.models import Link, LinkList, Subscriber
 from app import db, userDatastore, app
 
@@ -16,18 +16,33 @@ def createOrLoginUser():
     }
 	return jsonify(items=ret_dict)
 
-@auth.route('/request/access-key', methods=['POST', 'GET'])
-def requestApiAccessKey():
-	requestUrl = GoogleAuthenticationProvider().constructAuthorizationCodeRequestUrl()
-	GoogleAuthenticationProvider().getAuthorizationCode(requestUrl)
-	return str(requestUrl)
+@auth.route('/request/access-key/<provider>', methods=['GET'])
+def requestApiAccessKey(provider):
+	if provider == 'google':
+		providerObject = GoogleAuthenticationProvider()
+	elif provider == 'facebook':
+		providerObject = FacebookAuthenticationProvider()
+	else:
+		return None
 
-@auth.route('/oauth2/callback', methods=['POST', 'GET'])
-def receiveAuthorizationCode():
+	requestUrl = providerObject.constructAuthorizationCodeRequestUrl()
+	return redirect(requestUrl)
+
+@auth.route('/oauth2/<provider>/callback', methods=['POST', 'GET'])
+def receiveAuthorizationCode(provider):
 	code = request.args.get('code')
-	requestUrl = GoogleAuthenticationProvider().constructAccessTokenRequestUrl(code)
-	response = GoogleAuthenticationProvider().getAccessToken(requestUrl)
-	return str(response.content)
+	providerObject = None
+
+	if provider == 'google':	
+		providerObject = GoogleAuthenticationProvider()	
+	elif provider == 'facebook':
+		providerObject = FacebookAuthenticationProvider()
+	else:
+		return None
+
+	requestUrl = providerObject.constructAccessTokenRequestUrl(code)
+	accessToken = providerObject.getAccessToken(requestUrl)
+	return accessToken
 
 @auth.route('/retrieve/user', methods=['POST'])
 def retrieveUser():
