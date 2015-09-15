@@ -43,8 +43,7 @@ def receiveAuthorizationCode(provider):
 	requestUrl = providerObject.constructAccessTokenRequestUrl(code)
 	accessToken = providerObject.getAccessToken(requestUrl)
 	userData = providerObject.getUserData(accessToken)
-	print userData
-	return userData
+	return str(userData)
 
 @auth.route('/retrieve/user', methods=['POST'])
 def retrieveUser():

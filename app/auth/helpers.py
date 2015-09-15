@@ -45,13 +45,13 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 	def getUserData(self, accessToken):
 		userRequestUrl = 'https://www.googleapis.com/plus/v1/people/me'
 		headers = {"Authorization": "Bearer " + accessToken}
-		userResponse = requests.get(url = serviceRequestUrl, headers = headers)
-		filteredUserResponse = filterUserResponse(userResponse)
-		return filterUserResponse
+		userResponse = requests.get(url = userRequestUrl, headers = headers)
+		filteredUserResponse = self._filterUserResponse(userResponse)
+		return filteredUserResponse
 
-	def filterUserResponse(userResponse):
+	def _filterUserResponse(self, userResponse):
 		decodedResponse = json.loads(userResponse.content)
-		userEmail = decodedResponse['email'][0]
+		userEmail = decodedResponse['emails'][0]['value']
 		userName = decodedResponse['name']['givenName'] + ' ' + decodedResponse['name']['familyName']
 		userData = {"email": userEmail, "name": userName}
 		return userData
@@ -79,10 +79,10 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 	def getUserData(self, accessToken):
 		userRequestUrl = 'https://graph.facebook.com/me?fields=email,name&access_token=' + accessToken
 		userResponse = requests.get(userRequestUrl)
-		decodedUserResponse = json.loads(userIdResponse.content)
-		return decodedUserResponse
+		filteredUserResponse = self._filterUserResponse(userResponse)
+		return filteredUserResponse
 
-	def filterUserResponse(userResponse):
+	def _filterUserResponse(self, userResponse):
 		decodedUserResponse = json.loads(userResponse.content)
 		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"]}
 		return userData
