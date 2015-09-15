@@ -2,8 +2,6 @@ from abc import abstractmethod
 import traceback
 import os
 import youtube_dl
-import soundcloud
-import beatport
 
 class BaseMediaProvider:
 	localDownloadsDirectory = 'downloads'

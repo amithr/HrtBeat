@@ -1,0 +1,8 @@
+virtualenv
+flask
+flask-sqlalchemy
+flask-wtf
+flask-session
+flask-security
+flask-migrate
+youtube_dl

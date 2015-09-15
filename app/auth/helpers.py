@@ -17,13 +17,6 @@ class BaseAuthenticationProvider:
 		decodedResponse = json.loads(response.content)
 		return decodedResponse["access_token"]
 
-	def storeAccessToken(self, accessToken):
-		return
-
-	@abstractmethod
-	def constructServiceRequestUrl(self, accessToken):
-		return
-
 	@abstractmethod
 	def getUserData(self):
 		return
@@ -47,18 +40,22 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 		baseUrl = 'https://www.googleapis.com/oauth2/v3/token?'
 		grant_type = 'authorization_code'
 		constructedUrl = baseUrl + '&code=' + code + '&client_id=' + self.client_id + '&client_secret=' + self.client_secret + '&redirect_uri=' + self.redirect_uri + '&grant_type=' + grant_type
-
-	def storeAccessToken(self, accessToken):
-		return
-
-	def constructServiceRequestUrl(self, accessToken):
-		baseUrl = 'https://www.googleapis.com/plus/v1/people/me?'
-		constructedUrl = baseUrl + '&access_token=' + accessToken
 		return constructedUrl
 
-	def getUserData(self, serviceRequestUrl):
-		response = requests.post(serviceRequestUrl)
-		return response
+	def getUserData(self, accessToken):
+		userRequestUrl = 'https://www.googleapis.com/plus/v1/people/me'
+		headers = {"Authorization": "Bearer " + accessToken}
+		userResponse = requests.get(url = serviceRequestUrl, headers = headers)
+		filteredUserResponse = filterUserResponse(userResponse)
+		return filterUserResponse
+
+	def filterUserResponse(userResponse):
+		decodedResponse = json.loads(userResponse.content)
+		userEmail = decodedResponse['email'][0]
+		userName = decodedResponse['name']['givenName'] + ' ' + decodedResponse['name']['familyName']
+		userData = {"email": userEmail, "name": userName}
+		return userData
+
 
 class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['FACEBOOK_CLIENT_ID']
@@ -70,7 +67,8 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 	def constructAuthorizationCodeRequestUrl(self):
 		baseUrl = 'https://www.facebook.com/dialog/oauth?'
 		response_type = 'code'
-		constructedUrl = baseUrl + 'client_id=' + self.client_id + '&redirect_uri=' + self.redirect_uri + '&response_type=' + response_type 
+		scope = 'email,public_profile'
+		constructedUrl = baseUrl + 'client_id=' + self.client_id + '&redirect_uri=' + self.redirect_uri + '&response_type=' + response_type  + '&scope=' + scope
 		return constructedUrl
 
 	def constructAccessTokenRequestUrl(self, code):
@@ -78,11 +76,13 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 		constructedUrl = baseUrl + 'client_id=' + self.client_id + '&redirect_uri=' + self.redirect_uri + '&client_secret=' + self.client_secret + '&code=' + code
 		return constructedUrl
 
-	def storeAccessToken(self, accessToken):
-		return
+	def getUserData(self, accessToken):
+		userRequestUrl = 'https://graph.facebook.com/me?fields=email,name&access_token=' + accessToken
+		userResponse = requests.get(userRequestUrl)
+		decodedUserResponse = json.loads(userIdResponse.content)
+		return decodedUserResponse
 
-	def constructServiceRequestUrl(self, accessToken):
-		return
-
-	def getUserData(self, serviceRequestUrl):
-		return
+	def filterUserResponse(userResponse):
+		decodedUserResponse = json.loads(userResponse.content)
+		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"]}
+		return userData
