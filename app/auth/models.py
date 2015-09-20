@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     access_token = db.Column(db.String(255))
     provider_id = db.Column(db.String(255))
+    image_url = db.Column(db.String(512))
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime())
     last_login_at = db.Column(db.DateTime())
@@ -27,15 +28,3 @@ class User(db.Model, UserMixin):
     login_count = db.Column(db.Integer)
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
-
-class Connection(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    provider_id = db.Column(db.String(255))
-    provider_user_id = db.Column(db.String(255))
-    access_token = db.Column(db.String(255))
-    secret = db.Column(db.String(255))
-    display_name = db.Column(db.String(255))
-    profile_url = db.Column(db.String(512))
-    image_url = db.Column(db.String(512))
-    rank = db.Column(db.Integer)

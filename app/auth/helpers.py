@@ -3,6 +3,13 @@ from abc import abstractmethod
 from flask import json
 from app import db, app
 from app.auth.models import User, Role
+import hashlib
+import uuid
+
+'''Login, generate authorization token using access token, send to frontend, store in cookie'''
+'''Pass authorization code back for each request, decrypt using decorator function'''
+'''Authorization code should be in a cookie after the first login, destroy cookie every hour, force user to login again'''
+'''Hold access token and login details in a session? Not sure - One app load pass the session key'''
 
 class BaseAuthenticationProvider:
 	@abstractmethod
@@ -18,6 +25,9 @@ class BaseAuthenticationProvider:
 		decodedResponse = json.loads(response.content)
 		return decodedResponse["access_token"]
 
+	def storeAccessToken(self, accessToken):
+		return True
+
 	@abstractmethod
 	def getUserData(self):
 		return
@@ -30,6 +40,10 @@ class BaseAuthenticationProvider:
 			db.session.commit()
 			return True
 		return False
+
+	@abstractmethod
+	def logout(self):
+		return
 
 
 class GoogleAuthenticationProvider(BaseAuthenticationProvider):
@@ -69,6 +83,9 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 		userData = {"email": userEmail, "name": userName}
 		return userData
 
+	def logout(self):
+		return True
+
 
 class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['FACEBOOK_CLIENT_ID']
@@ -102,3 +119,28 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 		decodedUserResponse = json.loads(userResponse.content)
 		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"], "provider_id": self.provider_id}
 		return userData
+
+	def logout(self):
+		return True
+
+class BaseCryptoProvider():
+	def requires_authorization_token:
+		@wraps(f)
+		def decorated_function(*args, **kwargs):
+			authorizationToken = flask.request.headers.get('Authorization-Token')
+			if not authorizationToken:
+				'''Login page'''
+			else:
+				'''Pass'''
+		return decorated_function
+
+	def hashStringValue(value):
+		salt = uuid.uuid4().hex
+    	return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
+
+	def checkHashedStringAgainstOriginalString(hashedString, originalString):
+		original, salt = hashedString.split(':')
+    	return original == hashlib.sha256(salt.encode() + originalString.encode()).hexdigest())
+
+
+
