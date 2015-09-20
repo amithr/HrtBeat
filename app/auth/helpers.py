@@ -1,7 +1,8 @@
 import requests
 from abc import abstractmethod
-from app import app
 from flask import json
+from app import db, app
+from app.auth.models import User, Role
 
 class BaseAuthenticationProvider:
 	@abstractmethod
@@ -21,8 +22,20 @@ class BaseAuthenticationProvider:
 	def getUserData(self):
 		return
 
+	def processUserData(self, userData):
+		user = User.query.filter_by(email=userData["email"]).first()
+		if user is None:
+			newUser = User(email = userData["email"], name = userData["name"], provider_id = userData["provider_id"], access_token = userData["access_token"])
+			db.session.add(newUser)
+			db.session.commit()
+			return True
+		return False
+
+
 class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['GOOGLE_CLIENT_ID']
+
+	provider_id = 'google'
 
 	client_secret = app.config['GOOGLE_CLIENT_SECRET']
 
@@ -60,6 +73,8 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['FACEBOOK_CLIENT_ID']
 
+	provider_id = 'facebook'
+
 	client_secret = app.config['FACEBOOK_CLIENT_SECRET']
 
 	redirect_uri = 'http://localhost:5000/auth/oauth2/facebook/callback'
@@ -80,9 +95,10 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 		userRequestUrl = 'https://graph.facebook.com/me?fields=email,name&access_token=' + accessToken
 		userResponse = requests.get(userRequestUrl)
 		filteredUserResponse = self._filterUserResponse(userResponse)
+		filteredUserResponse["access_token"] = accessToken
 		return filteredUserResponse
 
 	def _filterUserResponse(self, userResponse):
 		decodedUserResponse = json.loads(userResponse.content)
-		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"]}
+		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"], "provider_id": self.provider_id}
 		return userData

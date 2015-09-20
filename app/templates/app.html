@@ -1,10 +1,15 @@
 <html ng-app="hrtBeatApp">
 	<h1>HrtBeat</h1>
 	<div id="header" ng-controller="HeaderController">
+		<div id="user-data">
+			<input id="user-email" type="hidden" value="{{ userData.email }}">
+			<input id="user-name" type="hidden" value="{{ userData.name }}">
+			<input id="access-token" type="hidden" value="{{ userData.access_token }}">
+			<input id="provider-id" type="hidden" value="{{ userData.provider_id }}">
+		</div>
 		<button class="btn" ng-show="isUserLoggedIn" ng-click="logout()">Logout</button>
 		<button class="btn" ng-show="isUserLoggedIn">Register</button>
 	</div>
-
 	<head>
 		<meta charset="UTF-8">
         <title>HrtBeat</title>

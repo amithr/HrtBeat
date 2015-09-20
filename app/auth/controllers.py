@@ -1,9 +1,6 @@
 from flask import Blueprint, request, render_template, jsonify, redirect
 from flask_security import auth_token_required, current_user, logout_user
-from app.auth.models import User, Role
 from app.auth.helpers import GoogleAuthenticationProvider, FacebookAuthenticationProvider
-from app.core.models import Link, LinkList, Subscriber
-from app import db, userDatastore, app
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -15,6 +12,8 @@ def createOrLoginUser():
         "Key2": "value2"
     }
 	return jsonify(items=ret_dict)
+
+
 
 @auth.route('/request/access-key/<provider>', methods=['GET'])
 def requestApiAccessKey(provider):
@@ -43,7 +42,8 @@ def receiveAuthorizationCode(provider):
 	requestUrl = providerObject.constructAccessTokenRequestUrl(code)
 	accessToken = providerObject.getAccessToken(requestUrl)
 	userData = providerObject.getUserData(accessToken)
-	return str(userData)
+	userData["is_user_new"] = providerObject.processUserData(userData)
+	return render_template('app.html', userData = userData)
 
 @auth.route('/retrieve/user', methods=['POST'])
 def retrieveUser():
