@@ -1,6 +1,6 @@
 import requests
 from abc import abstractmethod
-from flask import json
+from flask import json, session, render_template
 from app import db, app
 from app.auth.models import User, Role
 import hashlib
@@ -20,6 +20,15 @@ class BaseAuthenticationProvider:
 	def constructAccessTokenRequestUrl(self, code):
 		return
 
+	def getProviderObject(self, provider):
+		if provider == 'google':	
+			return GoogleAuthenticationProvider()
+		elif provider == 'facebook':
+			return FacebookAuthenticationProvider()
+		else:
+			return None
+
+
 	def getAccessToken(self, accessTokenRequestUrl):
 		response = requests.post(accessTokenRequestUrl)
 		decodedResponse = json.loads(response.content)
@@ -34,22 +43,23 @@ class BaseAuthenticationProvider:
 
 	def processUserData(self, userData):
 		user = User.query.filter_by(email=userData["email"]).first()
+		session[userData["email"]] = json.dumps(userData)
 		if user is None:
-			newUser = User(email = userData["email"], name = userData["name"], provider_id = userData["provider_id"], access_token = userData["access_token"])
+			newUser = User(email = userData["email"], name = userData["name"], provider = userData["provider"], access_token = userData["access_token"])
 			db.session.add(newUser)
 			db.session.commit()
 			return True
 		return False
 
 	@abstractmethod
-	def logout(self):
+	def logout(self, userData):
 		return
 
 
 class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['GOOGLE_CLIENT_ID']
 
-	provider_id = 'google'
+	provider = 'google'
 
 	client_secret = app.config['GOOGLE_CLIENT_SECRET']
 
@@ -74,23 +84,26 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 		headers = {"Authorization": "Bearer " + accessToken}
 		userResponse = requests.get(url = userRequestUrl, headers = headers)
 		filteredUserResponse = self._filterUserResponse(userResponse)
+		filteredUserResponse["access_token"] = accessToken
 		return filteredUserResponse
 
 	def _filterUserResponse(self, userResponse):
 		decodedResponse = json.loads(userResponse.content)
 		userEmail = decodedResponse['emails'][0]['value']
 		userName = decodedResponse['name']['givenName'] + ' ' + decodedResponse['name']['familyName']
-		userData = {"email": userEmail, "name": userName}
+		userData = {"email": userEmail, "name": userName, "provider": self.provider}
 		return userData
 
 	def logout(self):
+		session.pop(userData["email"])
+		redirect('https://accounts.google.com/logout')
 		return True
 
 
 class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['FACEBOOK_CLIENT_ID']
 
-	provider_id = 'facebook'
+	provider = 'facebook'
 
 	client_secret = app.config['FACEBOOK_CLIENT_SECRET']
 
@@ -117,30 +130,11 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 
 	def _filterUserResponse(self, userResponse):
 		decodedUserResponse = json.loads(userResponse.content)
-		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"], "provider_id": self.provider_id}
+		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"], "provider": self.provider}
 		return userData
 
-	def logout(self):
+	def logout(self, userData):
+		session.pop(userData["email"])
 		return True
-
-class BaseCryptoProvider():
-	def requires_authorization_token:
-		@wraps(f)
-		def decorated_function(*args, **kwargs):
-			authorizationToken = flask.request.headers.get('Authorization-Token')
-			if not authorizationToken:
-				'''Login page'''
-			else:
-				'''Pass'''
-		return decorated_function
-
-	def hashStringValue(value):
-		salt = uuid.uuid4().hex
-    	return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
-
-	def checkHashedStringAgainstOriginalString(hashedString, originalString):
-		original, salt = hashedString.split(':')
-    	return original == hashlib.sha256(salt.encode() + originalString.encode()).hexdigest())
-
 
 

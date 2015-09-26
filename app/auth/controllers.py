@@ -1,6 +1,6 @@
 from flask import Blueprint, request, render_template, jsonify, redirect
 from flask_security import auth_token_required, current_user, logout_user
-from app.auth.helpers import GoogleAuthenticationProvider, FacebookAuthenticationProvider
+from app.auth.helpers import BaseAuthenticationProvider
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -17,28 +17,14 @@ def createOrLoginUser():
 
 @auth.route('/request/access-key/<provider>', methods=['GET'])
 def requestApiAccessKey(provider):
-	if provider == 'google':
-		providerObject = GoogleAuthenticationProvider()
-	elif provider == 'facebook':
-		providerObject = FacebookAuthenticationProvider()
-	else:
-		return None
-
+	providerObject = BaseAuthenticationProvider().getProviderObject(provider)
 	requestUrl = providerObject.constructAuthorizationCodeRequestUrl()
 	return redirect(requestUrl)
 
 @auth.route('/oauth2/<provider>/callback', methods=['POST', 'GET'])
 def receiveAuthorizationCode(provider):
 	code = request.args.get('code')
-	providerObject = None
-
-	if provider == 'google':	
-		providerObject = GoogleAuthenticationProvider()	
-	elif provider == 'facebook':
-		providerObject = FacebookAuthenticationProvider()
-	else:
-		return None
-
+	providerObject = BaseAuthenticationProvider().getProviderObject(provider)
 	requestUrl = providerObject.constructAccessTokenRequestUrl(code)
 	accessToken = providerObject.getAccessToken(requestUrl)
 	userData = providerObject.getUserData(accessToken)
@@ -57,7 +43,8 @@ def updateUser():
 def deleteUser():
 	return
 
-@auth.route('/logout', methods=['POST'])
+@auth.route('/logout/<provider>', methods=['POST'])
 def logoutUser():
-	logout_user();
+	providerObject = BaseAuthenticationProvider().getProviderObject(provider)
+	providerObject.logout()
 	return jsonify(status=True)
