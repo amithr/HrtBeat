@@ -7,6 +7,10 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
+link_lists_users = db.Table('link_lists_users', 
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('link_list_id', db.Integer(), db.ForeignKey('link_list.id')))
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
@@ -26,5 +30,7 @@ class User(db.Model, UserMixin):
     last_login_ip = db.Column(db.String(45))
     current_login_ip = db.Column(db.String(45))
     login_count = db.Column(db.Integer)
+    admin_link_lists = db.relationship('LinkList', backref='User')
+    editor_link_lists = db.relationship('LinkList', secondary=link_lists_users, backref=db.backref('users', lazy='dynamic'))
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))

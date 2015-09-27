@@ -18,6 +18,11 @@ def getLinkList():
 	else:
 		return jsonify(status=True, id=linkList.id, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
 
+@core.route("/retrieve/user/link-list", methods=['POST'])
+def getLinkListsByUser():
+	data = request.get_json()
+	return jsonify(status=True)
+
 @core.route("/create/link-list", methods=['POST'])
 def addLinkList():
 	data = request.get_json()
