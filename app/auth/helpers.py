@@ -49,6 +49,8 @@ class BaseAuthenticationProvider:
 			db.session.add(newUser)
 			db.session.commit()
 			return True
+		else:
+			user.access_token = userData["access_token"]
 		return False
 
 	@abstractmethod
