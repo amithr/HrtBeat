@@ -55,6 +55,15 @@ class BaseAuthenticationProvider:
 	def logout(self, userData):
 		return
 
+	def checkIfApiRequestIsAuthentic(self, request, requestData):
+		authorizationToken = request.headers.get('Authorization-Token')
+		accessToken = session[requestData["email"]]["access_token"]
+		if accessToken is not authorizationToken:
+			session.pop(requestData["email"])
+			render_template("app.html")
+			return False
+		return True
+
 
 class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 	client_id = app.config['GOOGLE_CLIENT_ID']
