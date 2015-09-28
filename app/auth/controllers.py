@@ -28,12 +28,13 @@ def receiveAuthorizationCode(provider):
 	requestUrl = providerObject.constructAccessTokenRequestUrl(code)
 	accessToken = providerObject.getAccessToken(requestUrl)
 	userData = providerObject.getUserData(accessToken)
-	userData["is_user_new"] = providerObject.processUserData(userData)
-	return render_template('app.html', userData = userData)
+	return render_template('app.html', isUserLoggedIn="true", email=userData["email"], accessToken=userData["access_token"])
 
 @auth.route('/retrieve/user', methods=['POST'])
 def retrieveUser():
-	return str(current_user.id)
+	data = request.get_json()
+	userData = session[data["email"]]
+	return userData
 
 @auth.route('/update/user', methods=['POST'])
 def updateUser():

@@ -2,11 +2,17 @@
 	<h1>HrtBeat</h1>
 	<div id="header" ng-controller="HeaderController">
 		<div id="user-data">
-			<input id="user-email" ng-model="email" type="hidden" value="{{ userData.email }}">
-			<input id="user-name" ng-model="name" type="hidden" value="{{ userData.name }}">
-			<input id="access-token"  ng-model="access-token" type="hidden" value="{{ userData.access_token }}">
-			<input id="provider" ng-model="provider" type="hidden" value="{{ userData.provider }}">
+			<input id="user-email" type="hidden" value="{{ email }}">
+			<input id="access-token"  type="hidden" value="{{ accessToken }}">
+			<input id="is-user-logged-in" type="hidden" 
+			value="{% if isUserLoggedIn is defined %}
+						{{ isUserLoggedIn }}
+					{% else %}
+						{{ 'false' }}
+					{% endif %}"
+			>
 		</div>
+		
 	</div>
 	<head>
 		<meta charset="UTF-8">

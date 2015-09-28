@@ -25,12 +25,6 @@ angular.module('hrtBeatApp', ['ngRoute'])
 	})
 	.factory('requestService', ['$http', function($http) {
 		return {
-			setAuthenticationToken: function(authenticationToken) {
-				$.cookie('authenticationToken', authenticationToken);
-			},
-			getAuthenticationToken: function() {
-				return $.cookie('authenticationToken');
-			},
 			postRequest: function(url, params, errorMsg, callback) {
 				params.cache = false;
 				var req = {
@@ -181,15 +175,8 @@ angular.module('hrtBeatApp', ['ngRoute'])
 	}])
 	.factory('userService', ['$location', 'requestService', function(requestService) {
 		return {
-			loginUser: function(params, callback) {
-				var url = '/login';
-				var errorMsg = 'Could not login user';
-				requestService.postRequest(url, params, errorMsg, function(data) {
-					callback(data);
-				});
-			},
 			logoutUser: function(params, callback) {
-				var url = '/auth/logout'
+				var url = '/auth/logout';
 				var errorMsg = 'Could not logout user';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
@@ -197,15 +184,25 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					$location.path('/');
 				});
 			},
+			getUserData: function() {
+				var url = '/auth/retrieve/user';
+				var $headerContainer = $('#header');
+				var email = $headerContainer.find('#user-email').value();
+				var accessToken = $headerContainer.find('#access-token');
+				var params = {email: email, access_token: accessToken}
+				var errorMsg = 'Could not access user data';
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
+				});
+			},
 			isUserLoggedIn: function() {
-				if(requestService.getAuthenticationToken) {
-					return true;
-				} else {
-					return false;
-				}
+				var isUserLoggedIn = $('#is-user-logged-in').value();
+				return isUserLoggedIn
+				
 			},
 			ensureUserIsLoggedIn: function() {
-				if(!requestService.getAuthenticationToken()) {
+				var isUserLoggedIn = $('#header').find('#is-user-logged-in').value();
+				if(!isUserLoggedIn) {
 					$location.path('/');
 				}
 			}
@@ -215,9 +212,20 @@ angular.module('hrtBeatApp', ['ngRoute'])
 
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 
+		if($scope.didUserJustLogin == 'true') {
+			$location.path('/select');
+			$scope.didUserJustLogin = false;
+		}
+
 		$scope.logout = function() {
 			params = {};
-			userService.logoutUser(function(data){});
+			userService.logoutUser(function(data) {
+				$scope.email = '';
+				$scope.name = '';
+				$scope.accessToken = '';
+				$scope.provider = '';
+				$scope.didUserJustLogin = '';
+			});
 		}
 	}])
 	.controller('RegisterController', ['$scope', function($scope) {

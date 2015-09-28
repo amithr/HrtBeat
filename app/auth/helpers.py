@@ -51,6 +51,8 @@ class BaseAuthenticationProvider:
 			return True
 		else:
 			user.access_token = userData["access_token"]
+		userData["user_id"] = user.id
+		session[userData["email"]] = json.dumps(userData)
 		return False
 
 	@abstractmethod

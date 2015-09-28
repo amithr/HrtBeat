@@ -1,5 +1,4 @@
 from app import db, manager, migrate
-from app.auth.models import User
 
 class LinkList(db.Model):
 	__tablename__ = 'link_list'
@@ -7,7 +6,8 @@ class LinkList(db.Model):
 	link_list_access_key = db.Column(db.String(80), unique=True)
 	links = db.relationship('Link', backref='LinkList')
 	subscribers = db.relationship('Subscriber', backref='LinkList')
-	admin_user_id = db.column(db.Integer, db.ForeignKey('user.id'))
+	admin_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 
 	def __init__(self, link_list_access_key):
 		self.link_list_access_key = link_list_access_key
