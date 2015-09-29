@@ -3,7 +3,7 @@
 *
 * Description
 */
-angular.module('hrtBeatApp', ['ngRoute'])
+angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 	.config(function($routeProvider) {
 		$routeProvider
 			.when('/', {
@@ -168,17 +168,34 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					$location.path('/');
 				});
 			},
-			getUserData: function(callback) {
+			getUserDataFromClient: function() {
+				var email = $headerContainer.find('#user-email').val();
+				var accessToken = $headerContainer.find('#access-token').val();
+				var isUserLoggedIn = $('#header').find('#is-user-logged-in').val();
+				if(email) {
+					var userData = {email: email, accessToken: accessToken, isUserLoggedIn: isUserLoggedIn};
+					$cookies.set('userData', JSON.stringify(userData));
+					return userData;
+				} else if($cookies.get('userData')) {
+					return JSON.parse(userData);
+				} else {
+					//Flash message and redirect (you must be logged in)
+				}
+			}
+			getUserDataFromServer: function(callback) {
 				var url = '/auth/retrieve/user';
 				var $headerContainer = $('#header');
-				var email = $headerContainer.find('#user-email').value();
-				var accessToken = $headerContainer.find('#access-token');
+				var email = $headerContainer.find('#user-email').val();
+				var accessToken = $headerContainer.find('#access-token').val();
 				var params = {email: email, access_token: accessToken}
 				var errorMsg = 'Could not access user data';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
 				});
 			},
+			addUserAuthenticationDataToRequestParameters: function() {
+				var userData = this.getUserDataFromClient();
+			}
 			isUserLoggedIn: function() {
 				var isUserLoggedIn = $('#header').find('#is-user-logged-in').val();
 				return isUserLoggedIn
@@ -192,21 +209,25 @@ angular.module('hrtBeatApp', ['ngRoute'])
 			}
 		}
 	}])
-	.controller('HeaderController', ['$scope', 'userService', function($scope, userService) {
+	.controller('HeaderController', ['$scope', '$cookies', 'userService', function($scope, $cookies, userService) {
 		$scope.logout = function() {
 			params = {};
 			$scope.isUserLoggedIn = userService.isUserLoggedIn();
 			userService.logoutUser(function(data) {
 				$scope.email = '';
 				$scope.accessToken = '';
-				$scope.isUserLoggedIn = false
+				$scope.isUserLoggedIn = false;
+				$cookies.set('userData', '');
 			});
 		}
 	}])
-	.controller('WelcomeController', ['$scope', '$location', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, assetsService, userService, linkListOperationsService) {
+	.controller('WelcomeController', ['$scope', '$location', '$cookies', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, $cookies, assetsService, userService, linkListOperationsService) {
 		assetsService.addMainStylesheets();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
+
+		var userData = userService.getUserDataFromClient();
+
 
 		var validateLinkListKey = function(event) {
 			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
