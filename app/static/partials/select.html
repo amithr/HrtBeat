@@ -1,4 +1,7 @@
-<div id="select-playlist">
+<div id="login-form" ng-hide="{{ isUserLoggedIn }}">
+	<a href="/auth/request/access-key/google"><img src="/static/imgs/btn_google_signin_light_normal_web.png"></a>
+</div>
+<div id="select-playlist" ng-show="{{ isUserLoggedIn }}">
 	<form>
 		<input type="text" ng-model="linkListAccessKey" ng-blur="validateLinkListKey($event)" placeholder="Select playlist">
 		<input class="btn" type="submit" ng-click="selectLinkList()" value="Select">

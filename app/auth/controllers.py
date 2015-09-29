@@ -28,6 +28,9 @@ def receiveAuthorizationCode(provider):
 	requestUrl = providerObject.constructAccessTokenRequestUrl(code)
 	accessToken = providerObject.getAccessToken(requestUrl)
 	userData = providerObject.getUserData(accessToken)
+	providerObject.processUserData();
+	redirectUrl = '/core/' + userData["email"]
+	return redirect(redirectUrl)
 	return render_template('app.html', isUserLoggedIn="true", email=userData["email"], accessToken=userData["access_token"])
 
 @auth.route('/retrieve/user', methods=['POST'])

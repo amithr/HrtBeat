@@ -7,20 +7,12 @@ angular.module('hrtBeatApp', ['ngRoute'])
 	.config(function($routeProvider) {
 		$routeProvider
 			.when('/', {
-				templateUrl: '/static/partials/login.html',
-				controller: 'LoginController'
+				templateUrl: '/static/partials/select.html',
+				controller: 'WelcomeController'
 			})
 			.when('/list/:linkListAccessKey', {
 				templateUrl: '/static/partials/list.html',
 				controller: 'LinkListController'
-			})
-			.when('/select', {
-				templateUrl: '/static/partials/select.html',
-				controller: 'SelectLinkListController'
-			})
-			.when('/register', {
-				templateUrl: '/static/partials/register.html',
-				controller: 'RegisterController'
 			})
 	})
 	.factory('requestService', ['$http', function($http) {
@@ -31,7 +23,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					 method: 'POST',
 					 url: url,
 					 headers: {
-					   'Authentication-Token': this.getAuthenticationToken()
+					   'Authentication-Token': 1000
 					 },
 					 data: params
 				}
@@ -152,15 +144,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 	}])
 	.factory('validationService', ['requestService', function(requestService) {
 		return {
-			isEmailAddressValid: function(emailAddress) {
-				var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
-    			return pattern.test(emailAddress);
-			},
 			isLinkUrlValid: function(linkUrl) {
-			},
-			isPasswordValid: function(password) {
-				var pattern = new RegExp(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/);
-    			return pattern.test(password);
 			},
 			isLinkListAccessKeyValid: function(linkListAccessKey) {
 
@@ -184,7 +168,7 @@ angular.module('hrtBeatApp', ['ngRoute'])
 					$location.path('/');
 				});
 			},
-			getUserData: function() {
+			getUserData: function(callback) {
 				var url = '/auth/retrieve/user';
 				var $headerContainer = $('#header');
 				var email = $headerContainer.find('#user-email').value();
@@ -196,12 +180,12 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				});
 			},
 			isUserLoggedIn: function() {
-				var isUserLoggedIn = $('#is-user-logged-in').value();
+				var isUserLoggedIn = $('#header').find('#is-user-logged-in').val();
 				return isUserLoggedIn
 				
 			},
 			ensureUserIsLoggedIn: function() {
-				var isUserLoggedIn = $('#header').find('#is-user-logged-in').value();
+				var isUserLoggedIn = this.isUserLoggedIn();
 				if(!isUserLoggedIn) {
 					$location.path('/');
 				}
@@ -209,32 +193,19 @@ angular.module('hrtBeatApp', ['ngRoute'])
 		}
 	}])
 	.controller('HeaderController', ['$scope', 'userService', function($scope, userService) {
-
-		$scope.isUserLoggedIn = userService.isUserLoggedIn();
-
-		if($scope.didUserJustLogin == 'true') {
-			$location.path('/select');
-			$scope.didUserJustLogin = false;
-		}
-
 		$scope.logout = function() {
 			params = {};
+			$scope.isUserLoggedIn = userService.isUserLoggedIn();
 			userService.logoutUser(function(data) {
 				$scope.email = '';
-				$scope.name = '';
 				$scope.accessToken = '';
-				$scope.provider = '';
-				$scope.didUserJustLogin = '';
+				$scope.isUserLoggedIn = false
 			});
 		}
 	}])
-	.controller('RegisterController', ['$scope', function($scope) {
-		$scope.register = function() {
-
-		}
-	}])
-	.controller('SelectLinkListController', ['$scope', '$location', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, assetsService, userService, linkListOperationsService) {
+	.controller('WelcomeController', ['$scope', '$location', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, assetsService, userService, linkListOperationsService) {
 		assetsService.addMainStylesheets();
+		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
 
 		var validateLinkListKey = function(event) {
@@ -261,27 +232,6 @@ angular.module('hrtBeatApp', ['ngRoute'])
 				});
 			}
 		};
-	}])
-	.controller('LoginController', ['$scope', '$location', 'requestService', 'assetsService','userService', 'validationService', function($scope, $location, requestService, assetsService, userService, validationService) {
-		assetsService.addMainStylesheets();
-
-		$scope.loginUser = function() {
-			var params = {email: $scope.email, password: $scope.password};
-			if(!params.email || !validationService.isEmailAddressValid(params.email)) {
-				//The form turns red or green?
-			} else if(!params.password) {
-				//The form turns red or green?
-			} else {
-				userService.loginUser(params, function(data) {
-					if(data.response.user) {
-						requestService.setAuthenticationToken(data.response.user.authentication_token);
-						$location.path('/select');
-					} else {
-						
-					}
-				});
-			}
-		}		
 	}])
 	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', function($scope, $routeParams, 
 																																			requestService, assetsService, linkListOperationsService, linkOperationsService, 

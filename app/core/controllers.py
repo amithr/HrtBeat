@@ -5,9 +5,13 @@ from app import db
 
 core = Blueprint('core', __name__, url_prefix='/core')
 
-@core.route("/")
-def getApp():
-	return render_template('app.html')
+@core.route("/<email>")
+def getApp(email):
+	if email:
+		userData = json.loads(session[email])
+		return render_template('app.html', isUserLoggedIn="true", email=userData["email"], accessToken=userData["access_token"])
+	else:
+		return render_template('app.html')
 
 @core.route("/retrieve/link-list", methods=['POST'])
 def getLinkList():
