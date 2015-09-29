@@ -1,12 +1,12 @@
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, render_template, jsonify, json, session
 from app.core.models import Link, LinkList, Subscriber
 from app.core.helpers import Helpers, LinkListHelpers
 from app import db
 
 core = Blueprint('core', __name__, url_prefix='/core')
-
+@core.route("/")
 @core.route("/<email>")
-def getApp(email):
+def getApp(email=None):
 	if email:
 		userData = json.loads(session[email])
 		return render_template('app.html', isUserLoggedIn="true", email=userData["email"], accessToken=userData["access_token"])
