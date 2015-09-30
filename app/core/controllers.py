@@ -9,7 +9,7 @@ core = Blueprint('core', __name__, url_prefix='/core')
 def getApp(email=None):
 	if email:
 		userData = json.loads(session[email])
-		return render_template('app.html', isUserLoggedIn="true", email=userData["email"], accessToken=userData["access_token"])
+		return render_template('app.html', isUserLoggedIn='true', userData = userData)
 	else:
 		return render_template('app.html')
 

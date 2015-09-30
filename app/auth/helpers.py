@@ -1,6 +1,6 @@
 import requests
 from abc import abstractmethod
-from flask import json, session, render_template
+from flask import json, session, render_template, redirect
 from app import db, app
 from app.auth.models import User, Role
 import hashlib
@@ -107,8 +107,8 @@ class GoogleAuthenticationProvider(BaseAuthenticationProvider):
 		userData = {"email": userEmail, "name": userName, "provider": self.provider}
 		return userData
 
-	def logout(self):
-		session.pop(userData["email"])
+	def logout(self, email):
+		session.pop(email)
 		redirect('https://accounts.google.com/logout')
 		return True
 
@@ -146,8 +146,8 @@ class FacebookAuthenticationProvider(BaseAuthenticationProvider):
 		userData = {"email": decodedUserResponse["email"], "name": decodedUserResponse["name"], "provider": self.provider}
 		return userData
 
-	def logout(self, userData):
-		session.pop(userData["email"])
+	def logout(self, email):
+		session.pop(email)
 		return True
 
 

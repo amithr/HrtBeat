@@ -46,8 +46,11 @@ def updateUser():
 def deleteUser():
 	return
 
-@auth.route('/logout/<provider>', methods=['POST'])
+@auth.route('/logout/', methods=['POST'])
 def logoutUser():
+	data = request.get_json()
+	provider = data["provider"]
+	email = data["email"]
 	providerObject = BaseAuthenticationProvider().getProviderObject(provider)
-	providerObject.logout()
+	providerObject.logout(email)
 	return jsonify(status=True)

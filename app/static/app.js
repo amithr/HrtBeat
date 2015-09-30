@@ -157,49 +157,60 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.factory('userService', ['$location', 'requestService', function(requestService) {
+	.factory('userService', ['$location', '$cookies', 'requestService', function($location, $cookies, requestService) {
 		return {
 			logoutUser: function(params, callback) {
-				var url = '/auth/logout';
+				var url = '/auth/logout/';
 				var errorMsg = 'Could not logout user';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
-					requestService.setAuthenticationToken('');
-					$location.path('/');
+					window.location = '/core';
 				});
+			},
+			getUserDataFromDom: function() {
+				var $headerContainer = $('#header');
+				var isUserLoggedIn = $headerContainer.find('#is-user-logged-in').val().trim();
+				var email = $headerContainer.find('#email').val();
+				var name = $headerContainer.find('#name').val();
+				var accessToken = $headerContainer.find('#access-token').val();
+				var provider = $headerContainer.find('#provider').val();
+				var userData = {email: email, accessToken: accessToken, provider: provider, isUserLoggedIn: isUserLoggedIn};
+				return userData
+			},
+			clearUserDataFromDom: function() {
+				var $headerContainer = $('#header');
+				var email = $headerContainer.find('#email').val('');
+				var name = $headerContainer.find('#name').val('');
+				var accessToken = $headerContainer.find('#access-token').val('');
+				var provider = $headerContainer.find('#provider').val('');
 			},
 			getUserDataFromClient: function() {
-				var email = $headerContainer.find('#user-email').val();
-				var accessToken = $headerContainer.find('#access-token').val();
-				var isUserLoggedIn = $('#header').find('#is-user-logged-in').val();
-				if(email) {
-					var userData = {email: email, accessToken: accessToken, isUserLoggedIn: isUserLoggedIn};
-					$cookies.set('userData', JSON.stringify(userData));
+				var isUserLoggedIn = $('#header').find('#is-user-logged-in').val().trim();
+				if(isUserLoggedIn == 'true') {
+					var userData = this.getUserDataFromDom();
+					$cookies['userData'] = JSON.stringify(userData);
 					return userData;
-				} else if($cookies.get('userData')) {
-					return JSON.parse(userData);
+				} else if($cookies['userData']) {
+					var userDataFromCookie = JSON.parse($cookies['userData']);
+					var userData = {email: userDataFromCookie['email'], accessToken: userDataFromCookie['accessToken'], provider: userDataFromCookie['provider'], isUserLoggedIn: userDataFromCookie['isUserLoggedIn']};
+					return userData;
 				} else {
+					$location.path('/');
 					//Flash message and redirect (you must be logged in)
 				}
-			}
-			getUserDataFromServer: function(callback) {
-				var url = '/auth/retrieve/user';
-				var $headerContainer = $('#header');
-				var email = $headerContainer.find('#user-email').val();
-				var accessToken = $headerContainer.find('#access-token').val();
-				var params = {email: email, access_token: accessToken}
-				var errorMsg = 'Could not access user data';
-				requestService.postRequest(url, params, errorMsg, function(data) {
-					callback(data);
-				});
 			},
-			addUserAuthenticationDataToRequestParameters: function() {
+			addUserAuthenticationDataToRequestParameters: function(params) {
 				var userData = this.getUserDataFromClient();
-			}
+				return $.extend(params, userData);
+			},
 			isUserLoggedIn: function() {
-				var isUserLoggedIn = $('#header').find('#is-user-logged-in').val();
-				return isUserLoggedIn
-				
+				var isUserLoggedInFromDom = $('#header').find('#is-user-logged-in').val().trim();
+				var isUserLoggedInFromCookie = $cookies['userData'];
+				if((isUserLoggedInFromDom == 'true') || $cookies['userData']) {
+					return true;
+				} else {
+					return false;
+				}
 			},
 			ensureUserIsLoggedIn: function() {
 				var isUserLoggedIn = this.isUserLoggedIn();
@@ -209,15 +220,15 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.controller('HeaderController', ['$scope', '$cookies', 'userService', function($scope, $cookies, userService) {
+	.controller('HeaderController', ['$scope', '$location', '$cookies', 'userService', function($scope, $location, $cookies, userService) {
 		$scope.logout = function() {
-			params = {};
+			var userData = userService.getUserDataFromClient();
+			var params = {email: userData["email"], provider: userData["provider"]};
 			$scope.isUserLoggedIn = userService.isUserLoggedIn();
-			userService.logoutUser(function(data) {
-				$scope.email = '';
-				$scope.accessToken = '';
+			userService.logoutUser(params, function(data) {
 				$scope.isUserLoggedIn = false;
-				$cookies.set('userData', '');
+				userService.clearUserDataFromDom();
+				$cookies['userData'] = '';
 			});
 		}
 	}])
@@ -225,9 +236,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		assetsService.addMainStylesheets();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
-
-		var userData = userService.getUserDataFromClient();
-
 
 		var validateLinkListKey = function(event) {
 			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
