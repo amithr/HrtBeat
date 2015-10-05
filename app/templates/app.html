@@ -2,6 +2,7 @@
 	<h1>HrtBeat</h1>
 	<div id="header" ng-controller="HeaderController">
 		<div id="user-data">
+			<input id="user-id" type="hidden" value="{{ userData.user_id }}"
 			<input id="email" type="hidden" value="{{ userData.email }}">
 			<input id="name" type="hidden" value="{{ userData.name }}">
 			<input id="provider" type="hidden" value="{{ userData.provider }}">
@@ -14,7 +15,6 @@
 					{% endif %}"
 			>
 		</div>
-		<button ng-click="logout()">Logout</button>
 	</div>
 	<head>
 		<meta charset="UTF-8">

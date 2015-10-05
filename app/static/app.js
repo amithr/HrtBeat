@@ -50,9 +50,8 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 	}])
 	.factory('linkListOperationsService', ['requestService', function(requestService) {
 		return {
-			addLinkList: function(linkListAccessKey, callback) {
+			addLinkList: function(params, callback) {
 				var url = '/core/create/link-list';
-				var params = {linkListAccessKey: linkListAccessKey};
 				var errorMsg = 'Failed to add link list.';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
@@ -170,15 +169,17 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			getUserDataFromDom: function() {
 				var $headerContainer = $('#header');
 				var isUserLoggedIn = $headerContainer.find('#is-user-logged-in').val().trim();
+				var id = $headerContainer.find('#user-id').val();
 				var email = $headerContainer.find('#email').val();
 				var name = $headerContainer.find('#name').val();
 				var accessToken = $headerContainer.find('#access-token').val();
 				var provider = $headerContainer.find('#provider').val();
-				var userData = {email: email, accessToken: accessToken, provider: provider, isUserLoggedIn: isUserLoggedIn};
+				var userData = {id: id, email: email, accessToken: accessToken, provider: provider, isUserLoggedIn: isUserLoggedIn};
 				return userData
 			},
 			clearUserDataFromDom: function() {
 				var $headerContainer = $('#header');
+				var id = $headerContainer.find('#user-id').val('')
 				var email = $headerContainer.find('#email').val('');
 				var name = $headerContainer.find('#name').val('');
 				var accessToken = $headerContainer.find('#access-token').val('');
@@ -192,7 +193,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					return userData;
 				} else if($cookies['userData']) {
 					var userDataFromCookie = JSON.parse($cookies['userData']);
-					var userData = {email: userDataFromCookie['email'], accessToken: userDataFromCookie['accessToken'], provider: userDataFromCookie['provider'], isUserLoggedIn: userDataFromCookie['isUserLoggedIn']};
+					var userData = {id: userDataFromCookie['id'], email: userDataFromCookie['email'], accessToken: userDataFromCookie['accessToken'], provider: userDataFromCookie['provider'], isUserLoggedIn: userDataFromCookie['isUserLoggedIn']};
 					return userData;
 				} else {
 					$location.path('/');
@@ -221,21 +222,25 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		}
 	}])
 	.controller('HeaderController', ['$scope', '$location', '$cookies', 'userService', function($scope, $location, $cookies, userService) {
-		$scope.logout = function() {
-			var userData = userService.getUserDataFromClient();
-			var params = {email: userData["email"], provider: userData["provider"]};
-			$scope.isUserLoggedIn = userService.isUserLoggedIn();
-			userService.logoutUser(params, function(data) {
-				$scope.isUserLoggedIn = false;
-				userService.clearUserDataFromDom();
-				$cookies['userData'] = '';
-			});
-		}
 	}])
 	.controller('WelcomeController', ['$scope', '$location', '$cookies', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, $cookies, assetsService, userService, linkListOperationsService) {
 		assetsService.addMainStylesheets();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
+		var userData = userService.getUserDataFromClient();
+
+		$scope.logout = function() {
+			var userData = userService.getUserDataFromClient();
+			if(userData) {
+				var params = {email: userData["email"], provider: userData["provider"]};
+				$scope.isUserLoggedIn = userService.isUserLoggedIn();
+				userService.logoutUser(params, function(data) {
+					$scope.isUserLoggedIn = false;
+					userService.clearUserDataFromDom();
+					$cookies['userData'] = '';
+				});
+			}
+		}
 
 		var validateLinkListKey = function(event) {
 			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
@@ -246,8 +251,12 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		};
 
 		var redirectToCurrentLinkList = function() {
-			var linkListPath = '/list/' + $scope.linkListAccessKey;
-			$location.path(linkListPath);
+			if($scope.linkLinkAccessKeyExists) {
+				var linkListPath = '/list/' + $scope.linkListAccessKey;
+				$location.path(linkListPath);
+			} else {
+				$location.path('/');
+			}
 		}
 
 		$scope.selectLinkList = function() {
@@ -255,16 +264,17 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		};
 
 		$scope.addLinkList = function() {
-			if(!$scope.linkListAccessKeyExists) {
-				linkListOperationsService.addLinkList($scope.linkListAccessKey, function(data) {
+			if(!$scope.linkListAccessKeyExists && userData) {
+				params = {linkListAccessKey: linkListAccessKey, adminUserId: userData.id};
+				linkListOperationsService.addLinkList(params, function(data) {
 					redirectToCurrentLinkList();
 				});
 			}
 		};
 	}])
-	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', function($scope, $routeParams, 
+	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, 
 																																			requestService, assetsService, linkListOperationsService, linkOperationsService, 
-																																			providersOperationsService) {
+																																			providersOperationsService, userService) {
 		
 		$scope.links = [];
 		assetsService.addFontAwesomeStylesheet();
