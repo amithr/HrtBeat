@@ -4,7 +4,7 @@
 </div>
 <div id="select-playlist" ng-show="{{ isUserLoggedIn }}">
 	<form>
-		<input type="text" ng-model="linkListAccessKey" ng-blur="validateLinkListKey($event)" placeholder="Select playlist">
+		<input type="text" ng-model="linkListAccessKey" placeholder="Select playlist">
 		<input class="btn" type="submit" ng-click="selectLinkList()" value="Select">
 		<input class="btn add-btn" type="submit" ng-click="addLinkList()" value="+">
 	</form>

@@ -242,26 +242,16 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 
-		var validateLinkListKey = function(event) {
+		$scope.selectLinkList = function() {
 			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
 				if(data.status) {
-					$scope.linkLinkAccessKeyExists = true;
-				}
+					var linkListPath = '/list/' + $scope.linkListAccessKey;
+					$location.path(linkListPath);
+				} else {
+					$location.path('/');
+				}	
 			});
-		};
-
-		var redirectToCurrentLinkList = function() {
-			if($scope.linkLinkAccessKeyExists) {
-				var linkListPath = '/list/' + $scope.linkListAccessKey;
-				$location.path(linkListPath);
-			} else {
-				$location.path('/');
-			}
 		}
-
-		$scope.selectLinkList = function() {
-			redirectToCurrentLinkList();
-		};
 
 		$scope.addLinkList = function() {
 			if(!$scope.linkListAccessKeyExists && userData) {
@@ -354,6 +344,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				$('.link p.delete-link').off().on('click', function(e) {
 					var $link = $(e.target).parent();
 					var $linkContainer = $(e.target).parent().parent();
+					var linkData = getLinkData($link);
 					var linkId = $linkContainer.attr('data-link-id');
 					linkOperationsService.deleteLink(linkId, function(data){
 						$linkContainer.remove();
