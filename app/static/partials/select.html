@@ -1,11 +1,15 @@
-<button ng-show="{{ isUserLoggedIn }}" ng-click="logout()">Logout</button>
-<div id="login-form" ng-hide="{{ isUserLoggedIn }}">
-	<a href="/auth/request/access-key/google"><img src="/static/imgs/btn_google_signin_light_normal_web.png"></a>
-</div>
 <div id="select-playlist" ng-show="{{ isUserLoggedIn }}">
 	<form>
 		<input type="text" ng-model="linkListAccessKey" placeholder="Select playlist">
 		<input class="btn" type="submit" ng-click="selectLinkList()" value="Select">
 		<input class="btn add-btn" type="submit" ng-click="addLinkList()" value="+">
 	</form>
+</div>
+<div id="playlist-menu">
+	<li ng-repeat="linkList in linkLists">
+		<linkList
+			linkListId="linkList.id"
+			linkListName="linkList.name">
+		</linkList>
+	</li>
 </div>

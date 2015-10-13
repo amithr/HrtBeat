@@ -8,7 +8,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		$routeProvider
 			.when('/', {
 				templateUrl: '/static/partials/select.html',
-				controller: 'WelcomeController'
+				controller: 'ControlPanelController'
 			})
 			.when('/list/:linkListAccessKey', {
 				templateUrl: '/static/partials/list.html',
@@ -61,6 +61,14 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			retrieveLinkList: function(linkListAccessKey, callback) {
 				var url = '/core/retrieve/link-list';
 				var params = {linkListAccessKey: linkListAccessKey};
+				var errorMsg = 'Failed to get link list.';
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
+				});
+			},
+			retrieveLinkListsByUser: function(userId, callback) {
+				var url = '/core/retrieve/user/link-lists';
+				var params = {id: userId};
 				var errorMsg = 'Failed to get link list.';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
@@ -222,12 +230,9 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		}
 	}])
 	.controller('HeaderController', ['$scope', '$location', '$cookies', 'userService', function($scope, $location, $cookies, userService) {
-	}])
-	.controller('WelcomeController', ['$scope', '$location', '$cookies', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, $cookies, assetsService, userService, linkListOperationsService) {
-		assetsService.addMainStylesheets();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
-		$scope.linkListAccessKeyExists = false;
 		var userData = userService.getUserDataFromClient();
+		console.log(userData);
 
 		$scope.logout = function() {
 			var userData = userService.getUserDataFromClient();
@@ -241,6 +246,12 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				});
 			}
 		}
+	}])
+	.controller('ControlPanelController', ['$scope', '$location', '$cookies', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, $cookies, assetsService, userService, linkListOperationsService) {
+		assetsService.addMainStylesheets();
+		$scope.isUserLoggedIn = userService.isUserLoggedIn();
+		$scope.linkListAccessKeyExists = false;
+		var userData = userService.getUserDataFromClient();
 
 		$scope.selectLinkList = function() {
 			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
@@ -255,13 +266,24 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 
 		$scope.addLinkList = function() {
 			if(!$scope.linkListAccessKeyExists && userData) {
-				params = {linkListAccessKey: linkListAccessKey, adminUserId: userData.id};
+				params = {linkListAccessKey: $scope.linkListAccessKey, adminUserId: userData["id"]};
 				linkListOperationsService.addLinkList(params, function(data) {
-					redirectToCurrentLinkList();
+					$scope.selectLinkList();
 				});
 			}
 		};
+
+		$scope.loadLinkLists = function() {
+			if(userData) {
+				linkListOperationsService.retrieveLinkListsByUser(userData["id"], function(data) {
+					console.log(data);
+				});
+			}
+		}
+
+		$scope.loadLinkLists();
 	}])
+
 	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, 
 																																			requestService, assetsService, linkListOperationsService, linkOperationsService, 
 																																			providersOperationsService, userService) {
@@ -300,6 +322,19 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$scope.songArtist = '';
 		}
 	}])
+	.directive('linkList', [], function() {
+		return {
+			restrict: 'E',
+			replace: true,
+			scope: {
+				linkListId: '=',
+				linkListName: '='
+			},
+			template: '',
+			link: ''
+		}
+
+	})
 	.directive('link', ['linkOperationsService', 'providersOperationsService', function(linkOperationsService, providersOperationsService) {
 		return {
 			restrict: 'E',

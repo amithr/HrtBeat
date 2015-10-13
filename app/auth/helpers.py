@@ -43,7 +43,6 @@ class BaseAuthenticationProvider:
 
 	def processUserData(self, userData):
 		user = User.query.filter_by(email=userData["email"]).first()
-		session[userData["email"]] = json.dumps(userData)
 		if user is None:
 			newUser = User(email = userData["email"], name = userData["name"], provider = userData["provider"], access_token = userData["access_token"])
 			db.session.add(newUser)
@@ -51,8 +50,8 @@ class BaseAuthenticationProvider:
 			return True
 		else:
 			user.access_token = userData["access_token"]
-		userData["user_id"] = user.id
-		session[userData["email"]] = json.dumps(userData)
+			userData["user_id"] = user.id
+			session[userData["email"]] = json.dumps(userData)
 		return False
 
 	@abstractmethod

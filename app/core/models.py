@@ -9,8 +9,12 @@ class LinkList(db.Model):
 	admin_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
-	def __init__(self, link_list_access_key):
+	def __init__(self, link_list_access_key, admin_user_id):
 		self.link_list_access_key = link_list_access_key
+		self.admin_user_id = admin_user_id
+
+	def getLinkListData(self):
+		return {'linkListId' : self.id, 'linkListAccessKey' : self.link_list_access_key}
 
 	def getSubscribersDataList(self):
 		subscribersLength = len(self.subscribers)

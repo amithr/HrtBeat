@@ -4,17 +4,6 @@ from app.auth.helpers import BaseAuthenticationProvider
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
-@auth.route('/create/login/user', methods=['POST'])
-@auth_token_required
-def createOrLoginUser():
-	ret_dict = {
-        "Key1": "Value1",
-        "Key2": "value2"
-    }
-	return jsonify(items=ret_dict)
-
-
-
 @auth.route('/request/access-key/<provider>', methods=['GET'])
 def requestApiAccessKey(provider):
 	providerObject = BaseAuthenticationProvider().getProviderObject(provider)

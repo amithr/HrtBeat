@@ -1,5 +1,6 @@
 from flask import Blueprint, request, render_template, jsonify, json, session
 from app.core.models import Link, LinkList, Subscriber
+from app.auth.models import User
 from app.core.helpers import Helpers, LinkListHelpers
 from app import db
 
@@ -22,15 +23,17 @@ def getLinkList():
 	else:
 		return jsonify(status=True, id=linkList.id, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
 
-@core.route("/retrieve/user/link-list", methods=['POST'])
+@core.route("/retrieve/user/link-lists", methods=['POST'])
 def getLinkListsByUser():
 	data = request.get_json()
-	return jsonify(status=True)
+	adminUserId = data["id"]
+	linkLists = LinkListHelpers.getSerializedLinkListsFromAdminUserId(adminUserId)
+	return jsonify(linkLists=linkLists)
 
 @core.route("/create/link-list", methods=['POST'])
 def addLinkList():
 	data = request.get_json()
-	newLinkList = LinkList(link_list_access_key = data["linkListAccessKey"])
+	newLinkList = LinkList(link_list_access_key = data["linkListAccessKey"], admin_user_id = data["adminUserId"])
 	Helpers.addObjectToDb(newLinkList)
 	return jsonify(status=True)
 
@@ -52,7 +55,7 @@ def addSubscriber():
 @core.route("/retrieve/subscribers", methods="POST")
 def getSubscribers():
 	data = request.get_json()
-	linkListId = LinkListHelpers.getLinkListIdFromLinkListAccessKey
+	linkListId = LinkListHelpers.getLinkListIdFromLinkListAccessKey()
 	subscribers = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]);
 	return jsonify(status=True)
 

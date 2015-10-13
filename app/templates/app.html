@@ -2,7 +2,7 @@
 	<h1>HrtBeat</h1>
 	<div id="header" ng-controller="HeaderController">
 		<div id="user-data">
-			<input id="user-id" type="hidden" value="{{ userData.user_id }}"
+			<input id="user-id" type="hidden" value="{{ userData.user_id }}">
 			<input id="email" type="hidden" value="{{ userData.email }}">
 			<input id="name" type="hidden" value="{{ userData.name }}">
 			<input id="provider" type="hidden" value="{{ userData.provider }}">
@@ -14,6 +14,10 @@
 						{{ 'false' }}
 					{% endif %}"
 			>
+		</div>
+		<button ng-show="{{ isUserLoggedIn }}" ng-click="logout()">Logout</button>
+		<div id="login-form" ng-hide="{{ isUserLoggedIn }}">
+			<a href="/auth/request/access-key/google"><img src="/static/imgs/btn_google_signin_light_normal_web.png"></a>
 		</div>
 	</div>
 	<head>
