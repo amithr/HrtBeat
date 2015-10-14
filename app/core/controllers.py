@@ -28,7 +28,7 @@ def getLinkListsByUser():
 	data = request.get_json()
 	adminUserId = data["id"]
 	linkLists = LinkListHelpers.getSerializedLinkListsFromAdminUserId(adminUserId)
-	return jsonify(linkLists=linkLists)
+	return jsonify(linkLists=linkLists, status=True)
 
 @core.route("/create/link-list", methods=['POST'])
 def addLinkList():

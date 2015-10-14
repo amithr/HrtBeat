@@ -14,7 +14,7 @@ class LinkList(db.Model):
 		self.admin_user_id = admin_user_id
 
 	def getLinkListData(self):
-		return {'linkListId' : self.id, 'linkListAccessKey' : self.link_list_access_key}
+		return {'id' : self.id, 'linkListAccessKey' : self.link_list_access_key}
 
 	def getSubscribersDataList(self):
 		subscribersLength = len(self.subscribers)

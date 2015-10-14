@@ -6,7 +6,7 @@ import youtube_dl
 class BaseMediaProvider:
 	localDownloadsDirectory = 'downloads'
 
-	def downloadSong(self, url):
+	def downloadSong(self, url, artist, title):
 		ydl_opts = {
 			'format': 'bestaudio/best',
 			'outtmpl': 'downloads/%(id)s.%(ext)s',

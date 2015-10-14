@@ -34,4 +34,8 @@ GOOGLE_CLIENT_SECRET = '5DcaOj-FsdKUUvIrcVNc8SdV'
 FACEBOOK_CLIENT_ID = '1681075138775381'
 FACEBOOK_CLIENT_SECRET = '516c9bd0bd9c6196a5befe1aaa39973b'
 
+#Celery Queue Configuration Parameters
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
 

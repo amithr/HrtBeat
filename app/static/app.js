@@ -251,6 +251,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		assetsService.addMainStylesheets();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
+		$scope.linkLists = [];
 		var userData = userService.getUserDataFromClient();
 
 		$scope.selectLinkList = function() {
@@ -276,7 +277,11 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		$scope.loadLinkLists = function() {
 			if(userData) {
 				linkListOperationsService.retrieveLinkListsByUser(userData["id"], function(data) {
-					console.log(data);
+					if(data.status) {
+						for(var i = 0; i < data.linkLists.length; i++) {
+							$scope.linkLists.push(data.linkLists[i]);
+						}
+					}
 				});
 			}
 		}
@@ -322,19 +327,24 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$scope.songArtist = '';
 		}
 	}])
-	.directive('linkList', [], function() {
+	.directive('linkList', ['linkListOperationsService', function(linkListOperationsService) {
 		return {
 			restrict: 'E',
 			replace: true,
 			scope: {
-				linkListId: '=',
-				linkListName: '='
+				linklistid: '=',
+				linklistaccesskey: '='
 			},
-			template: '',
-			link: ''
+			template: '<div class="link-list">' +
+				'<p class="link-list-access-key" contenteditable="true">{{linklistaccesskey}}</p>' +
+			'</div>'
+			,
+			link: function($scope, $http, element) {
+				
+			}
 		}
 
-	})
+	}])
 	.directive('link', ['linkOperationsService', 'providersOperationsService', function(linkOperationsService, providersOperationsService) {
 		return {
 			restrict: 'E',
