@@ -1,10 +1,18 @@
 from abc import abstractmethod
+from app import celery, mail
 import traceback
 import os
 import youtube_dl
 
 class BaseMediaProvider:
 	localDownloadsDirectory = 'downloads'
+
+	def __init__(self, user_email):
+		self.user_email = user_email
+
+
+	def sendEmailWithDownload(self):
+		return
 
 	def downloadSong(self, url, artist, title):
 		ydl_opts = {

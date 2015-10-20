@@ -232,7 +232,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 	.controller('HeaderController', ['$scope', '$location', '$cookies', 'userService', function($scope, $location, $cookies, userService) {
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		var userData = userService.getUserDataFromClient();
-		console.log(userData);
 
 		$scope.logout = function() {
 			var userData = userService.getUserDataFromClient();
@@ -254,6 +253,20 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		$scope.linkLists = [];
 		var userData = userService.getUserDataFromClient();
 
+		$scope.loadLinkLists = function() {
+			if(userData) {
+				linkListOperationsService.retrieveLinkListsByUser(userData["id"], function(data) {
+					if(data.status) {
+						for(var i = 0; i < data.linkLists.length; i++) {
+							$scope.linkLists.push(data.linkLists[i]);
+						}
+					}
+				});
+			}
+		}
+
+		$scope.loadLinkLists();
+
 		$scope.selectLinkList = function() {
 			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
 				if(data.status) {
@@ -273,20 +286,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				});
 			}
 		};
-
-		$scope.loadLinkLists = function() {
-			if(userData) {
-				linkListOperationsService.retrieveLinkListsByUser(userData["id"], function(data) {
-					if(data.status) {
-						for(var i = 0; i < data.linkLists.length; i++) {
-							$scope.linkLists.push(data.linkLists[i]);
-						}
-					}
-				});
-			}
-		}
-
-		$scope.loadLinkLists();
 	}])
 
 	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, 
@@ -310,6 +309,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					}
 				}
 			});
+
 		};
 
 		$scope.refreshLinkList();
@@ -380,7 +380,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					return link;
 				}
 
-				$('.link p').off().on('blur', function(e){
+				$('.link p').off().on('blur', function(e) {
 					var $link = $(e.target).parent();
 					linkOperationsService.updateLink(getLinkData($link), function(data){});
 					e.preventDefault();

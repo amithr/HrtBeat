@@ -7,9 +7,10 @@
 </div>
 <div id="playlist-menu">
 	<li ng-repeat="linkList in linkLists">
+		{{}}
 		<linkList
 			linklistid="linkList.id"
-			linklistaccesskey="linkList.linkListAccessKey">
-		</linkList>
+			linklistaccesskey="linkList.linkListAccessKey"
+			></linkList>
 	</li>
 </div>

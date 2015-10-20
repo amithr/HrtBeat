@@ -38,4 +38,12 @@ FACEBOOK_CLIENT_SECRET = '516c9bd0bd9c6196a5befe1aaa39973b'
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
+#Flask-Mail parameters
+MAIL_SERVER = 'smtp.gmail.com'
+MAIL_PORT = 465
+MAIL_USERNAME = 'amithravindar2493@gmail.com'
+MAIL_PASSWORD = 'sulochana2493'
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True
+
 

@@ -1,9 +1,10 @@
 virtualenv
 flask
+flask-mail
+flask-migrate
+flask-security
+flask-session
 flask-sqlalchemy
 flask-wtf
-flask-session
-flask-security
-flask-migrate
 youtube_dl
 celery
