@@ -257,6 +257,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 	}])
 	.controller('ControlPanelController', ['$scope', '$location', '$cookies', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, $cookies, assetsService, userService, linkListOperationsService) {
 		assetsService.addMainStylesheets();
+		assetsService.addFontAwesomeStylesheet();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
 		$scope.linkLists = [];
@@ -343,8 +344,8 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			'</div>'
 			,
 			link: function($scope, $http, element) {
-				$('.link-list p.access-link-list').off().on('click', function(e) {
-					var $linkList = $(e.target).parent();
+				$('.link-list p.access-link-list i').off().on('click', function(e) {
+					var $linkList = $(e.target).parent().parent();
 					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
 					linkListOperationsService.retrieveAndRedirectToLinkList(linkListAccessKey);
 				});
