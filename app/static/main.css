@@ -118,7 +118,7 @@ ul li {
 	height: 50px;
 }
 
-.link,.link-list p {
+.link p, .link-list p {
 	position: relative;
 	margin-left: 10px;
 	display: inline-block;
@@ -133,7 +133,7 @@ ul li {
 	border-radius: 5px;
 }
 
-.link-list p {
+.link-list i {
 	cursor: hand;
 }
 

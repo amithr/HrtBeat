@@ -48,14 +48,13 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.factory('linkListOperationsService', ['requestService', function(requestService) {
+	.factory('linkListOperationsService', ['$location', 'requestService', function($location, requestService) {
 		return {
 			addLinkList: function(params, callback) {
 				var url = '/core/create/link-list';
 				var errorMsg = 'Failed to add link list.';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
-
 				});
 			},
 			retrieveLinkList: function(linkListAccessKey, callback) {
@@ -64,6 +63,16 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				var errorMsg = 'Failed to get link list.';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
+				});
+			},
+			retrieveAndRedirectToLinkList: function(linkListAccessKey) {
+				this.retrieveLinkList(linkListAccessKey, function(data) {
+					if(data.status) {
+						var linkListPath = '/list/' + linkListAccessKey;
+						$location.path(linkListPath);
+					} else {
+						$location.path('/');
+					}	
 				});
 			},
 			retrieveLinkListsByUser: function(userId, callback) {
@@ -258,7 +267,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				linkListOperationsService.retrieveLinkListsByUser(userData["id"], function(data) {
 					if(data.status) {
 						for(var i = 0; i < data.linkLists.length; i++) {
-							console.log(data.linkLists[i].linkListAccessKey);
 							$scope.linkLists.push(data.linkLists[i]);
 						}
 					}
@@ -269,14 +277,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		$scope.loadLinkLists();
 
 		$scope.selectLinkList = function() {
-			linkListOperationsService.retrieveLinkList($scope.linkListAccessKey, function(data) {
-				if(data.status) {
-					var linkListPath = '/list/' + $scope.linkListAccessKey;
-					$location.path(linkListPath);
-				} else {
-					$location.path('/');
-				}	
-			});
+			linkListOperationsService.retrieveAndRedirectToLinkList($scope.linkListAccessKey);
 		}
 
 		$scope.addLinkList = function() {
@@ -338,10 +339,15 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			},
 			template: '<div class="link-list">' +
 				'<p class="link-list-access-key" contenteditable="true">{{linklistaccesskey}}</p>' +
+				'<p class="access-link-list"><i class="fa fa-arrow-right"></i></p>' +
 			'</div>'
 			,
 			link: function($scope, $http, element) {
-				
+				$('.link-list p.access-link-list').off().on('click', function(e) {
+					var $linkList = $(e.target).parent();
+					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
+					linkListOperationsService.retrieveAndRedirectToLinkList(linkListAccessKey);
+				});
 			}
 		}
 
