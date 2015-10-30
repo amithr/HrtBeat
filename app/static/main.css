@@ -49,6 +49,12 @@ input[type="text"] {
 	margin: 0 auto;
 }
 
+#playlist-menu {
+	display: block;
+	width: 25%;
+	margin: 0 auto;
+}
+
 #select-playlist {
 	display: block;
 	width: 25%;
@@ -112,7 +118,7 @@ ul li {
 	height: 50px;
 }
 
-.link p {
+.link,.link-list p {
 	position: relative;
 	margin-left: 10px;
 	display: inline-block;
@@ -125,6 +131,10 @@ ul li {
 	border-style: solid;
 	border-color: rgba(178, 178, 178, 0.3);
 	border-radius: 5px;
+}
+
+.link-list p {
+	cursor: hand;
 }
 
 .link p:hover {

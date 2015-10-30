@@ -258,6 +258,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				linkListOperationsService.retrieveLinkListsByUser(userData["id"], function(data) {
 					if(data.status) {
 						for(var i = 0; i < data.linkLists.length; i++) {
+							console.log(data.linkLists[i].linkListAccessKey);
 							$scope.linkLists.push(data.linkLists[i]);
 						}
 					}
@@ -327,7 +328,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$scope.songArtist = '';
 		}
 	}])
-	.directive('linkList', ['linkListOperationsService', function(linkListOperationsService) {
+	.directive('linklist', ['linkListOperationsService', function(linkListOperationsService) {
 		return {
 			restrict: 'E',
 			replace: true,

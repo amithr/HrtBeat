@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from app import celery, mail
+from app import celery, mail, app
 import traceback
 import os
 import youtube_dl
@@ -7,11 +7,16 @@ import youtube_dl
 class BaseMediaProvider:
 	localDownloadsDirectory = 'downloads'
 
+	sender = app.config['MAIL_USERNAME']
+
 	def __init__(self, user_email):
 		self.user_email = user_email
 
 
 	def sendEmailWithDownload(self):
+		recipients = [self.user_email]
+		messageObect = Message(subject, sender=self.sender, recipients=recipients)
+		mail.send(messageObect)
 		return
 
 	def downloadSong(self, url, artist, title):
