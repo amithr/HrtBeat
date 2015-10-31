@@ -302,7 +302,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		};
 	}])
 
-	.controller('LinkListController', ['$scope', '$routeParams', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, 
+	.controller('LinkListController', ['$scope', '$routeParams', '$location', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, $location,
 																																			requestService, assetsService, linkListOperationsService, linkOperationsService, 
 																																			providersOperationsService, userService) {
 		
@@ -339,6 +339,10 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$scope.songUrl = '';
 			$scope.songTitle = '';
 			$scope.songArtist = '';
+		}, 
+
+		$scope.returnToControlPanel = function() {
+			$location.path('/');
 		}
 	}])
 	.directive('linklist', ['linkListOperationsService', function(linkListOperationsService) {
@@ -443,10 +447,11 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					});
 					providersOperationsService.downloadSong(linkData, function(isDownloadPossible) {
 						if(!isDownloadPossible) {
-							console.log('hello');
-							console.log($(e.target));
-							$(e.target).parent().css("border-color", "red");
+							$(e.target).parent().animate({ "border-color":"red"},"fast");
+						} else {
+							$(e.target).parent().animate({ "border-color":" #08e004)"},"fast");
 						}
+						$(e.target).parent().animate({ "border-color":"rgba(178, 178, 178, 0.3)"},3000);
 					});
 					linkOperationsService.updateLink(linkData, function(data){});
 					e.preventDefault();
