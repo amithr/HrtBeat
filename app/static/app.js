@@ -82,6 +82,14 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
 				});
+			},
+			deleteLinkList: function(linkListAccessKey, callback) {
+				var url = '/core/delete/link-list';
+				var params = {linkListAccessKey: linkListAccessKey};
+				var errorMsg = 'Failed to get link list.';
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
+				});
 			}
 		}
 	}])
@@ -111,7 +119,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.factory('providersOperationsService', ['requestService', function(requestService) {
+	.factory('providersOperationsService', ['requestService', 'userService', function(requestService, userService) {
 		return {
 			getSongProvider: function(url) {
 				var youtubeKey = 'youtube';
@@ -130,11 +138,14 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			getDownloadableSongProviders: function() {
 				return ['youtube']
 			},
-			downloadSong: function(link) {
+			downloadSong: function(link, callback) {
 				var url = '/providers/download/song'
-				var params = {provider: this.getSongProvider(link.songUrl), url: link.songUrl, artist: link.songArtist, title: link.songTitle}
+				var userData = userService.getUserDataFromClient();
+				var params = {provider: this.getSongProvider(link.songUrl), userEmail: userData['email'], url: link.songUrl, artist: link.songArtist, title: link.songTitle}
 				errorMsg = 'Could not download song.'
-				requestService.postRequest(url, params, errorMsg, function(data) {});
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data.status);
+				});
 			}	
 		}
 	}])
@@ -341,6 +352,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			template: '<div class="link-list">' +
 				'<p class="link-list-access-key" contenteditable="true">{{linklistaccesskey}}</p>' +
 				'<p class="access-link-list"><i class="fa fa-arrow-right"></i></p>' +
+				'<p class="delete-link-list"><i class="fa fa-trash"></i></p>' +
 			'</div>'
 			,
 			link: function($scope, $http, element) {
@@ -348,6 +360,13 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					var $linkList = $(e.target).parent().parent();
 					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
 					linkListOperationsService.retrieveAndRedirectToLinkList(linkListAccessKey);
+				});
+
+				$('.link-list p.delete-link-list i').off().on('click', function(e) {
+					var $linkList = $(e.target).parent().parent();
+					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
+					linkListOperationsService.deleteLinkList(linkListAccessKey, function(data){});
+					$linkList.remove();
 				});
 			}
 		}
@@ -422,7 +441,13 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					$scope.$apply(function() {
 						++$scope.downloadcount;
 					});
-					providersOperationsService.downloadSong(linkData);
+					providersOperationsService.downloadSong(linkData, function(isDownloadPossible) {
+						if(!isDownloadPossible) {
+							console.log('hello');
+							console.log($(e.target));
+							$(e.target).parent().css("border-color", "red");
+						}
+					});
 					linkOperationsService.updateLink(linkData, function(data){});
 					e.preventDefault();
 				});

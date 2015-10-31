@@ -40,7 +40,7 @@ def addLinkList():
 @core.route("/delete/link-list", methods=['POST'])
 def deleteLinkList():
 	data = request.get_json()
-	linkList = LinkList.query.filter_by(id=data["id"]).first()
+	linkList = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]).first()
 	Helpers.deleteObjectFromDb(linkList)
 	return jsonify(status=True)
 
