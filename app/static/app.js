@@ -253,6 +253,12 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		var userData = userService.getUserDataFromClient();
 
+		//Facebook API appends _=_ to url upon login redirect
+		if($location.path() == '/_=_') {
+			$location.path('/');
+		}
+		console.log($location.path());
+
 		$scope.logout = function() {
 			var userData = userService.getUserDataFromClient();
 			if(userData) {

@@ -48,6 +48,11 @@ input[type="text"] {
 	width: 38%;
 }
 
+#login-form.facebook-login img {
+	display: block;
+	width: 38%;	
+}
+
 #playlist-menu {
 	display: block;
 	width: 25%;
