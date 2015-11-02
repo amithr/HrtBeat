@@ -21,10 +21,10 @@
 			>
 		</div>
 		<button ng-show="{{ isUserLoggedIn }}" ng-click="logout()" class="btn small-margin-left">Logout</button>
-		<div id="login-form" ng-hide="{{ isUserLoggedIn }}">
+		<div id="login-form" class="small-margin-left small-margin-top" ng-hide="{{ isUserLoggedIn }}">
 			<a href="/auth/request/access-key/google"><img src="/static/imgs/btn_google_signin_light_normal_web.png"></a>
 		</div>
-		<div id="login-form" class="facebook-login" ng-hide="{{ isUserLoggedIn }}">
+		<div id="login-form" class="facebook-login small-margin-left small-margin-top" ng-hide="{{ isUserLoggedIn }}">
 			<a href="/auth/request/access-key/facebook"><img src="/static/imgs/facebook-login.png"></a>
 		</div>
 	</div>

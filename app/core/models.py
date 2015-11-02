@@ -4,6 +4,7 @@ class LinkList(db.Model):
 	__tablename__ = 'link_list'
 	id = db.Column(db.Integer, primary_key=True)
 	link_list_access_key = db.Column(db.String(80), unique=True)
+	editable = db.Column(db.Boolean())
 	links = db.relationship('Link', backref='LinkList')
 	subscribers = db.relationship('Subscriber', backref='LinkList')
 	admin_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -12,9 +13,10 @@ class LinkList(db.Model):
 	def __init__(self, link_list_access_key, admin_user_id):
 		self.link_list_access_key = link_list_access_key
 		self.admin_user_id = admin_user_id
+		editable = False
 
 	def getLinkListData(self):
-		return {'id' : self.id, 'linkListAccessKey' : self.link_list_access_key}
+		return {'id' : self.id, 'linkListAccessKey' : self.link_list_access_key, 'editable': self.editable}
 
 	def getSubscribersDataList(self):
 		subscribersLength = len(self.subscribers)

@@ -14,27 +14,36 @@ def getApp(email=None):
 	else:
 		return render_template('app.html')
 
+@core.route("/create/link-list", methods=['POST'])
+def createLinkList():
+	data = request.get_json()
+	newLinkList = LinkList(link_list_access_key = data["linkListAccessKey"], admin_user_id = data["adminUserId"])
+	Helpers.addObjectToDb(newLinkList)
+	return jsonify(status=True)
+
 @core.route("/retrieve/link-list", methods=['POST'])
-def getLinkList():
+def retrieveLinkList():
 	data = request.get_json()
 	linkList = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]).first()
 	if not linkList:
 		return jsonify(status=False)
 	else:
-		return jsonify(status=True, id=linkList.id, linkListAccessKey=linkList.link_list_access_key, subscribers=linkList.getSubscribersDataList(), subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
+		return jsonify(status=True, id=linkList.id, linkListAccessKey=linkList.link_list_access_key, editable=linkList.editable, subscriberCount=linkList.getSubscriberCount(), links=linkList.getLinksDataList())
 
 @core.route("/retrieve/user/link-lists", methods=['POST'])
-def getLinkListsByUser():
+def retrieveLinkListsByUser():
 	data = request.get_json()
 	adminUserId = data["id"]
 	linkLists = LinkListHelpers.getSerializedLinkListsFromAdminUserId(adminUserId)
 	return jsonify(linkLists=linkLists, status=True)
 
-@core.route("/create/link-list", methods=['POST'])
-def addLinkList():
+@core.route("/update/link-list", methods=['POST'])
+def updateLinkList():
 	data = request.get_json()
-	newLinkList = LinkList(link_list_access_key = data["linkListAccessKey"], admin_user_id = data["adminUserId"])
-	Helpers.addObjectToDb(newLinkList)
+	print data["editable"]
+	linkList = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]).first()
+	linkList.link_list_access_key = data["linkListAccessKey"]
+	linkList.editable = data["editable"]	
 	return jsonify(status=True)
 
 @core.route("/delete/link-list", methods=['POST'])

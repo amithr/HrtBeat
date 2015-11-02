@@ -50,7 +50,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 	}])
 	.factory('linkListOperationsService', ['$location', 'requestService', function($location, requestService) {
 		return {
-			addLinkList: function(params, callback) {
+			createLinkList: function(params, callback) {
 				var url = '/core/create/link-list';
 				var errorMsg = 'Failed to add link list.';
 				requestService.postRequest(url, params, errorMsg, function(data) {
@@ -72,13 +72,20 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 						$location.path(linkListPath);
 					} else {
 						$location.path('/');
-					}	
+					}
 				});
 			},
 			retrieveLinkListsByUser: function(userId, callback) {
 				var url = '/core/retrieve/user/link-lists';
 				var params = {id: userId};
 				var errorMsg = 'Failed to get link list.';
+				requestService.postRequest(url, params, errorMsg, function(data) {
+					callback(data);
+				});
+			},
+			updateLinkList: function(params, callback) {
+				var url = '/core/update/link-list';
+				var errorMsg = 'Failed to update link list';
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
 				});
@@ -257,7 +264,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		if($location.path() == '/_=_') {
 			$location.path('/');
 		}
-		console.log($location.path());
 
 		$scope.logout = function() {
 			var userData = userService.getUserDataFromClient();
@@ -298,10 +304,10 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			linkListOperationsService.retrieveAndRedirectToLinkList($scope.linkListAccessKey);
 		}
 
-		$scope.addLinkList = function() {
+		$scope.createLinkList = function() {
 			if(!$scope.linkListAccessKeyExists && userData) {
 				params = {linkListAccessKey: $scope.linkListAccessKey, adminUserId: userData["id"]};
-				linkListOperationsService.addLinkList(params, function(data) {
+				linkListOperationsService.createLinkList(params, function(data) {
 					$scope.selectLinkList();
 				});
 			}
@@ -357,12 +363,15 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			replace: true,
 			scope: {
 				linklistid: '=',
-				linklistaccesskey: '='
+				linklistaccesskey: '=',
+				editable: '='
 			},
 			template: '<div class="link-list">' +
 				'<p class="link-list-access-key" contenteditable="true">{{linklistaccesskey}}</p>' +
 				'<p class="access-link-list"><i class="fa fa-arrow-right"></i></p>' +
 				'<p class="delete-link-list"><i class="fa fa-trash"></i></p>' +
+				'<p class="share-link-list"><i class="fa fa-share-alt"></i></p>' +
+				'<p class="is-link-list-editable"><i class="fa fa-edit"></i></p>' +
 			'</div>'
 			,
 			link: function($scope, $http, element) {
@@ -377,6 +386,28 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
 					linkListOperationsService.deleteLinkList(linkListAccessKey, function(data){});
 					$linkList.remove();
+				});
+				$isLinkListEditableElement = $('.link-list p.is-link-list-editable');
+
+				if($scope.editable) {
+					$isLinkListEditableElement.css('color', '#08e004');
+				} else {
+					$isLinkListEditableElement.css('color', 'red');
+				}
+
+				$isLinkListEditableElement.off().on('click', function(e) {
+					var $linkList = $(e.target).parent().parent();
+					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
+					updateLinkListParameters = {linkListAccessKey: linkListAccessKey, editable: false};
+					if($scope.editable) {
+						$scope.editable = false;
+						$isLinkListEditableElement.css('color', '#08e004');
+						updateLinkListParameters.editable = true;
+					} else {
+						$scope.editable = true;
+						$isLinkListEditableElement.css('color', 'red');
+					}
+					linkListOperationsService.updateLinkList(updateLinkListParameters, function(data){})
 				});
 			}
 		}
@@ -413,12 +444,18 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					link.songArtist = $linkContainer.find('.song-artist').text();
 					link.clickCount = $linkContainer.find('.click-count').text();
 					link.downloadCount = $linkContainer.find('.download-count').text();
-					link.id = $linkContainer.attr('data-link-id');
+					linkIdFromDom = $link.attr('data-link-id');
+					if(linkIdFromDom) {
+						link.id = linkIdFromDom;
+					} else {
+						link.id = $linkContainer.attr('data-link-id');
+					}
 					return link;
 				}
 
 				$('.link p').off().on('blur', function(e) {
 					var $link = $(e.target).parent();
+					console.log(getLinkData($link));
 					linkOperationsService.updateLink(getLinkData($link), function(data){});
 					e.preventDefault();
 				});
@@ -455,7 +492,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 						if(!isDownloadPossible) {
 							$(e.target).parent().animate({ "border-color":"red"},"fast");
 						} else {
-							$(e.target).parent().animate({ "border-color":" #08e004)"},"fast");
+							$(e.target).parent().animate({ "border-color":"#08e004)"},"fast");
 						}
 						$(e.target).parent().animate({ "border-color":"rgba(178, 178, 178, 0.3)"},3000);
 					});

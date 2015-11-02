@@ -12,7 +12,7 @@ class DownloadError(Exception):
 		return repr(self.value)
 
 class BaseMediaProvider:
-	localDownloadsDirectory = 'downloads'
+	localDownloadsDirectory = '/app/static/downloads'
 
 	sender = app.config['MAIL_USERNAME']
 
@@ -24,7 +24,7 @@ class BaseMediaProvider:
 	def downloadSong(self, url, artist, title):
 		ydl_opts = {
 			'format': 'bestaudio/best',
-			'outtmpl': 'downloads/%(id)s.%(ext)s',
+			'outtmpl': 'app/static/downloads/%(id)s.%(ext)s',
 			'postprocessors': [{
 				'key': 'FFmpegExtractAudio',
 				'preferredcodec': 'mp3',
@@ -33,13 +33,14 @@ class BaseMediaProvider:
 		}
 
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-			localDownloadPath = self.getLocalDownloadPath(artist, title)
 			try:
-				os.stat(localDownloadPath)
-				print "%s already downloaded, continuing..." % localDownloadPath
+				print "%s already downloaded, continuing..."
+				result = ydl.extract_info(url, download=False)
+				self.sendEmailWithDownload(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
 			except OSError:
 				try:
 					result = ydl.extract_info(url, download=True)
+					self.sendEmailWithDownload(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
 				except Exception as e:
 					print "Can't download audio! %s\n" % traceback.format_exc()
 					raise DownloadError('Download not permitted')
@@ -50,11 +51,14 @@ class BaseMediaProvider:
 		"""Get song metadata"""
 		return
 
-	def getLocalDownloadPath(self, artist, title):
+	def getLocalDownloadPath(self, id):
 		if not os.path.exists(self.localDownloadsDirectory):
 			os.makedirs(self.localDownloadsDirectory)
 
-		return os.path.join(self.localDownloadsDirectory, "%s--%s.mp3" % (title, artist))
+		filename = (".").join(id, 'mp3')
+		fullDownloadPath = ("/").join(self.localDownloadsDirectory, filename)
+
+		return fullDownloadPath
 
 
 	@celery.task(bind=True)
@@ -62,7 +66,7 @@ class BaseMediaProvider:
 		recipients = [userEmail]
 		subject = 'Your HrtBeat download'
 		messageObject = Message(subject, sender=sender, recipients=recipients)
-		messageObject.body = 'Here is your download' + url
+		messageObject.body = 'Here is your download ' + url
 		mail.send(messageObject)
 		return
 
