@@ -13,7 +13,7 @@ class LinkList(db.Model):
 	def __init__(self, link_list_access_key, admin_user_id):
 		self.link_list_access_key = link_list_access_key
 		self.admin_user_id = admin_user_id
-		editable = False
+		self.editable = False
 
 	def getLinkListData(self):
 		return {'id' : self.id, 'linkListAccessKey' : self.link_list_access_key, 'editable': self.editable}

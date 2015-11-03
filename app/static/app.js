@@ -371,10 +371,18 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				'<p class="access-link-list"><i class="fa fa-arrow-right"></i></p>' +
 				'<p class="delete-link-list"><i class="fa fa-trash"></i></p>' +
 				'<p class="share-link-list"><i class="fa fa-share-alt"></i></p>' +
-				'<p class="is-link-list-editable"><i class="fa fa-edit"></i></p>' +
+				'<p class="is-link-list-editable" data-is-link-list-editable={{editable}}><i class="fa fa-edit"></i></p>' +
 			'</div>'
 			,
 			link: function($scope, $http, element) {
+
+				var getLinkListElements = function($linkList) {
+					var linkListElements = {};
+					linkListElements.linkListAccessKeyElement = $linkList.find('.link-list-access-key');
+					linkListElements.editableElement = $linkList.find('.is-link-list-editable');
+					return linkListElements;
+				};
+
 				$('.link-list p.access-link-list i').off().on('click', function(e) {
 					var $linkList = $(e.target).parent().parent();
 					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
@@ -387,28 +395,44 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					linkListOperationsService.deleteLinkList(linkListAccessKey, function(data){});
 					$linkList.remove();
 				});
-				$isLinkListEditableElement = $('.link-list p.is-link-list-editable');
 
-				if($scope.editable) {
-					$isLinkListEditableElement.css('color', '#08e004');
-				} else {
-					$isLinkListEditableElement.css('color', 'red');
-				}
-
-				$isLinkListEditableElement.off().on('click', function(e) {
-					var $linkList = $(e.target).parent().parent();
-					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
-					updateLinkListParameters = {linkListAccessKey: linkListAccessKey, editable: false};
-					if($scope.editable) {
-						$scope.editable = false;
-						$isLinkListEditableElement.css('color', '#08e004');
-						updateLinkListParameters.editable = true;
-					} else {
-						$scope.editable = true;
-						$isLinkListEditableElement.css('color', 'red');
-					}
-					linkListOperationsService.updateLinkList(updateLinkListParameters, function(data){})
+				$scope.$watch('editable', function() {
+					var editableElements = $('.link-list p.is-link-list-editable i');
+					editableElements.each(function() {
+						var linkListElements = getLinkListElements($(this).parent().parent());
+						currentEditableState = linkListElements['editableElement'].attr('data-is-link-list-editable');
+						console.log(currentEditableState);
+						if(currentEditableState == "true") {
+							$(this).css('color', '#08e004');
+						} else {
+							$(this).css('color', 'red');
+						}
+					});
 				});
+
+				$('.link-list p.is-link-list-editable i').off().on('click', function(e) {
+					$currentElement = $(e.target);
+					var $linkList = $currentElement.parent().parent();
+					var linkListElements = getLinkListElements($linkList);
+					var currentEditableState = linkListElements['editableElement'].attr('data-is-link-list-editable');
+					var updateLinkListParameters = {'linkListAccessKey': linkListElements['linkListAccessKeyElement'].text(), 'editable': currentEditableState};
+					console.log(updateLinkListParameters);
+					if(currentEditableState == "true") {
+						linkListElements['editableElement'].attr('data-is-link-list-editable', "false");
+						updateLinkListParameters.editable = false;
+						$currentElement.css('color', 'red');
+					} else {
+						linkListElements['editableElement'].attr('data-is-link-list-editable', "true");
+						updateLinkListParameters.editable = true;
+						$currentElement.css('color', '#08e004');
+					}
+					console.log(updateLinkListParameters);
+					linkListOperationsService.updateLinkList(updateLinkListParameters, function(data){});
+
+				});
+
+
+
 			}
 		}
 

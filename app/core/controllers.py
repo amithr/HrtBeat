@@ -40,10 +40,10 @@ def retrieveLinkListsByUser():
 @core.route("/update/link-list", methods=['POST'])
 def updateLinkList():
 	data = request.get_json()
-	print data["editable"]
 	linkList = LinkList.query.filter_by(link_list_access_key=data["linkListAccessKey"]).first()
 	linkList.link_list_access_key = data["linkListAccessKey"]
-	linkList.editable = data["editable"]	
+	linkList.editable = data["editable"]
+	db.session.commit()	
 	return jsonify(status=True)
 
 @core.route("/delete/link-list", methods=['POST'])
