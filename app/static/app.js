@@ -367,7 +367,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				editable: '='
 			},
 			template: '<div class="link-list">' +
-				'<p class="link-list-access-key" contenteditable="true">{{linklistaccesskey}}</p>' +
+				'<p class="link-list-access-key hover" contenteditable="true">{{linklistaccesskey}}</p>' +
 				'<p class="access-link-list"><i class="fa fa-arrow-right"></i></p>' +
 				'<p class="delete-link-list"><i class="fa fa-trash"></i></p>' +
 				'<p class="share-link-list"><i class="fa fa-share-alt"></i></p>' +
@@ -401,7 +401,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					editableElements.each(function() {
 						var linkListElements = getLinkListElements($(this).parent().parent());
 						currentEditableState = linkListElements['editableElement'].attr('data-is-link-list-editable');
-						console.log(currentEditableState);
 						if(currentEditableState == "true") {
 							$(this).css('color', '#08e004');
 						} else {
@@ -416,7 +415,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					var linkListElements = getLinkListElements($linkList);
 					var currentEditableState = linkListElements['editableElement'].attr('data-is-link-list-editable');
 					var updateLinkListParameters = {'linkListAccessKey': linkListElements['linkListAccessKeyElement'].text(), 'editable': currentEditableState};
-					console.log(updateLinkListParameters);
 					if(currentEditableState == "true") {
 						linkListElements['editableElement'].attr('data-is-link-list-editable', "false");
 						updateLinkListParameters.editable = false;
@@ -426,13 +424,8 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 						updateLinkListParameters.editable = true;
 						$currentElement.css('color', '#08e004');
 					}
-					console.log(updateLinkListParameters);
 					linkListOperationsService.updateLinkList(updateLinkListParameters, function(data){});
-
 				});
-
-
-
 			}
 		}
 
@@ -451,9 +444,9 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			},
 			template: 
 			'<div class="link" data-link-id="{{linkid}}">' +
-				'<p class="song-artist" contenteditable="true">{{songartist}}</p>' +
-				'<p class="song-title" contenteditable="true">{{songtitle}}</p>' +
-				'<p class="song-url" contenteditable="true">{{songurl}}</p>' +
+				'<p class="song-artist hover" contenteditable="true">{{songartist}}</p>' +
+				'<p class="song-title hover" contenteditable="true">{{songtitle}}</p>' +
+				'<p class="song-url hover" contenteditable="true">{{songurl}}</p>' +
 				'<p class="access-link"><a href="{{songurl}}" target="_blank"><i class="fa fa-arrow-right"></i></a><span class="click-count">{{clickcount}}</span></p>' +
 				'<p class="download-link"><i class="fa fa-download"></i><span class="download-count">{{downloadcount}}</span></p>' +
 				'<p class="delete-link"><i class="fa fa-trash"></i></p>' +

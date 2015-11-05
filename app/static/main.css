@@ -141,7 +141,9 @@ ul li {
 	cursor: hand;
 }
 
-.link p:hover {
+.hover:hover {
+	background-color: #8C8C8C;
+	color: white;
 }
 
 .link i {

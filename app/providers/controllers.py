@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template, jsonify, session
-from app import db
+from app import db, app
 from app.providers.helpers import YoutubeProvider, SoundCloudProvider, DownloadError
 
 providers = Blueprint('providers', __name__, url_prefix='/providers')
@@ -8,10 +8,10 @@ providers = Blueprint('providers', __name__, url_prefix='/providers')
 def downloadSong():
 	data = request.get_json()
 	try:
-		YoutubeProvider(data["userEmail"]).downloadSong(data["url"], data["artist"], data["title"])
+		songData = YoutubeProvider(data["userEmail"]).downloadSong(data["url"], data["artist"], data["title"])
 	except DownloadError as e:
 		return jsonify(status=False)
-	return jsonify(status=True)
+	return jsonify(status=True, songData=songData)
 
 @providers.route('/retrieve/song/data', methods=['POST'])
 def retrieveSongData():
@@ -23,3 +23,4 @@ def retrieveSongData():
 	else:
 		return	
 	return
+	

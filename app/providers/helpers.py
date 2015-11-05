@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from app import celery, mail, app
+from app import mail, app, celery
 from flask.ext.mail import Message
 import traceback
 import os
@@ -12,7 +12,7 @@ class DownloadError(Exception):
 		return repr(self.value)
 
 class BaseMediaProvider:
-	localDownloadsDirectory = '/app/static/downloads'
+	localDownloadsDirectory = 'app/static/downloads'
 
 	sender = app.config['MAIL_USERNAME']
 
@@ -36,15 +36,15 @@ class BaseMediaProvider:
 			try:
 				print "%s already downloaded, continuing..."
 				result = ydl.extract_info(url, download=False)
-				self.sendEmailWithDownload(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
+				self.sendEmailWithDownload.delay(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
 			except OSError:
 				try:
 					result = ydl.extract_info(url, download=True)
-					self.sendEmailWithDownload(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
+					self.sendEmailWithDownload.delay(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
 				except Exception as e:
 					print "Can't download audio! %s\n" % traceback.format_exc()
 					raise DownloadError('Download not permitted')
-		return
+		return result
 
 	@abstractmethod
 	def getSongData(self, url):
@@ -55,8 +55,8 @@ class BaseMediaProvider:
 		if not os.path.exists(self.localDownloadsDirectory):
 			os.makedirs(self.localDownloadsDirectory)
 
-		filename = (".").join(id, 'mp3')
-		fullDownloadPath = ("/").join(self.localDownloadsDirectory, filename)
+		filename = (".").join((id, 'mp3'))
+		fullDownloadPath = ("/").join((self.localDownloadsDirectory, filename))
 
 		return fullDownloadPath
 
@@ -67,8 +67,8 @@ class BaseMediaProvider:
 		subject = 'Your HrtBeat download'
 		messageObject = Message(subject, sender=sender, recipients=recipients)
 		messageObject.body = 'Here is your download ' + url
-		mail.send(messageObject)
-		return
+		with app.app_context():
+			mail.send(messageObject)
 
 class YoutubeProvider(BaseMediaProvider):
 	def getSongData(self, url):
