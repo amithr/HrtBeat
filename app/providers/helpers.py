@@ -34,8 +34,8 @@ class BaseMediaProvider:
 
 		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
 			try:
-				print "%s already downloaded, continuing..."
 				result = ydl.extract_info(url, download=False)
+				os.stat(self.getLocalDownloadPath(result['id']))
 				self.sendEmailWithDownload.delay(self.getLocalDownloadPath(result['id']), self.userEmail, self.sender)
 			except OSError:
 				try:

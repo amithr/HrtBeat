@@ -8,3 +8,4 @@ flask-sqlalchemy
 flask-wtf
 youtube_dl
 celery
+redis

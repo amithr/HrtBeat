@@ -151,6 +151,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				var params = {provider: this.getSongProvider(link.songUrl), userEmail: userData['email'], url: link.songUrl, artist: link.songArtist, title: link.songTitle}
 				errorMsg = 'Could not download song.'
 				requestService.postRequest(url, params, errorMsg, function(data) {
+					console.log(data);
 					callback(data.status);
 				});
 			}	
