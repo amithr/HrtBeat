@@ -97,6 +97,12 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				requestService.postRequest(url, params, errorMsg, function(data) {
 					callback(data);
 				});
+			},
+			setLinkListEditableFieldState: function(isLinkListEditable) {
+				$('#is-link-list-editable').val(isLinkListEditable);
+			},
+			isLinkListEditable: function() {
+				return $('#is-link-list-editable').val();
 			}
 		}
 	}])
@@ -151,7 +157,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				var params = {provider: this.getSongProvider(link.songUrl), userEmail: userData['email'], url: link.songUrl, artist: link.songArtist, title: link.songTitle}
 				errorMsg = 'Could not download song.'
 				requestService.postRequest(url, params, errorMsg, function(data) {
-					console.log(data);
 					callback(data.status);
 				});
 			}	
@@ -315,7 +320,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		};
 	}])
 
-	.controller('LinkListController', ['$scope', '$routeParams', '$location', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, $location,
+	.controller('LinkListController', ['$scope', '$routeParams', '$location', '$timeout', 'requestService','assetsService', 'linkListOperationsService', 'linkOperationsService', 'providersOperationsService', 'userService', function($scope, $routeParams, $location, $timeout,
 																																			requestService, assetsService, linkListOperationsService, linkOperationsService, 
 																																			providersOperationsService, userService) {
 		
@@ -330,16 +335,23 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$scope.links = [];
 			//Load all links from db
 			linkListOperationsService.retrieveLinkList(linkListAccessKey, function(data) {
+				console.log(data)
 				if(data.status) {
+					$timeout(function() {
+						linkListOperationsService.setLinkListEditableFieldState(data.editable);
+					});
 					for(var i = 0; i < data.links.length; i++) {
 						$scope.links.push(data.links[i]);
 					}
 				}
 			});
-
+			console.log(linkListOperationsService.isLinkListEditable());
 		};
 
+
 		$scope.refreshLinkList();
+		$scope.isLinkListEditable = linkListOperationsService.isLinkListEditable();
+		console.log($('#is-link-list-editable').val());
 
 		//Add link to db and then refresh link list
 		$scope.addLink = function() {
@@ -473,7 +485,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 
 				$('.link p').off().on('blur', function(e) {
 					var $link = $(e.target).parent();
-					console.log(getLinkData($link));
 					linkOperationsService.updateLink(getLinkData($link), function(data){});
 					e.preventDefault();
 				});

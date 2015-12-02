@@ -60,9 +60,12 @@ class BaseMediaProvider:
 
 		return fullDownloadPath
 
+	def getS3DownloadPath(self, id):
+		return
 
 	@celery.task(bind=True)
 	def sendEmailWithDownload(self, url, userEmail, sender):
+		# Use the tinyS3 library for uploading to s3
 		recipients = [userEmail]
 		subject = 'Your HrtBeat download'
 		messageObject = Message(subject, sender=sender, recipients=recipients)

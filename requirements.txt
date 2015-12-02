@@ -9,3 +9,4 @@ flask-wtf
 youtube_dl
 celery
 redis
+tinys3
