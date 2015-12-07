@@ -98,12 +98,14 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					callback(data);
 				});
 			},
-			setLinkListEditableFieldState: function(isLinkListEditable) {
-				$('#is-link-list-editable').val(isLinkListEditable);
+			setEditableStateOnLinkList: function(isLinkListEditable) {
+				var $linkListContainer = $('#link-list')
+				if(isLinkListEditable) {
+					$linkListContainer.find('.add-btn').show();
+				} else {
+					$linkListContainer.find('.add-btn').hide();
+				}
 			},
-			isLinkListEditable: function() {
-				return $('#is-link-list-editable').val();
-			}
 		}
 	}])
 	.factory('linkOperationsService', ['requestService', function(requestService) {
@@ -335,23 +337,16 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$scope.links = [];
 			//Load all links from db
 			linkListOperationsService.retrieveLinkList(linkListAccessKey, function(data) {
-				console.log(data)
 				if(data.status) {
-					$timeout(function() {
-						linkListOperationsService.setLinkListEditableFieldState(data.editable);
-					});
+					linkListOperationsService.setEditableStateOnLinkList(data.editable);
 					for(var i = 0; i < data.links.length; i++) {
+						data.links[i].editable = data.editable
 						$scope.links.push(data.links[i]);
 					}
 				}
 			});
-			console.log(linkListOperationsService.isLinkListEditable());
 		};
-
-
 		$scope.refreshLinkList();
-		$scope.isLinkListEditable = linkListOperationsService.isLinkListEditable();
-		console.log($('#is-link-list-editable').val());
 
 		//Add link to db and then refresh link list
 		$scope.addLink = function() {
@@ -388,7 +383,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			'</div>'
 			,
 			link: function($scope, $http, element) {
-
 				var getLinkListElements = function($linkList) {
 					var linkListElements = {};
 					linkListElements.linkListAccessKeyElement = $linkList.find('.link-list-access-key');
@@ -443,7 +437,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		}
 
 	}])
-	.directive('link', ['linkOperationsService', 'providersOperationsService', function(linkOperationsService, providersOperationsService) {
+	.directive('link', ['linkOperationsService', 'linkListOperationsService', 'providersOperationsService', function(linkOperationsService, linkListOperationsService, providersOperationsService) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -453,13 +447,14 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				songtitle: '=',
 				songartist: '=',
 				clickcount: '=',
-				downloadcount: '='
+				downloadcount: '=',
+				editable: '='
 			},
 			template: 
 			'<div class="link" data-link-id="{{linkid}}">' +
-				'<p class="song-artist hover" contenteditable="true">{{songartist}}</p>' +
-				'<p class="song-title hover" contenteditable="true">{{songtitle}}</p>' +
-				'<p class="song-url hover" contenteditable="true">{{songurl}}</p>' +
+				'<p class="song-artist hover" contenteditable="{{editable}}">{{songartist}}</p>' +
+				'<p class="song-title hover" contenteditable="{{editable}}">{{songtitle}}</p>' +
+				'<p class="song-url hover" contenteditable="{{editable}}">{{songurl}}</p>' +
 				'<p class="access-link"><a href="{{songurl}}" target="_blank"><i class="fa fa-arrow-right"></i></a><span class="click-count">{{clickcount}}</span></p>' +
 				'<p class="download-link"><i class="fa fa-download"></i><span class="download-count">{{downloadcount}}</span></p>' +
 				'<p class="delete-link"><i class="fa fa-trash"></i></p>' +
