@@ -48,7 +48,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.factory('linkListOperationsService', ['$location', 'requestService', function($location, requestService) {
+	.factory('linkListOperationsService', ['$location', 'requestService', 'userService', function($location, requestService, userService) {
 		return {
 			createLinkList: function(params, callback) {
 				var url = '/core/create/link-list';
@@ -105,7 +105,14 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				} else {
 					$linkListContainer.find('.add-btn').hide();
 				}
-			},
+			}, 
+			generateShareableLink: function(linkListAccessKey) {
+				var userData = userService.getUserDataFromClient();
+				var host = 'http://localhost:5000';
+				var userEmail = userData['email'];
+				var url = host + '/core/' + userEmail + '#/list/' + linkListAccessKey;
+				return url;
+			}
 		}
 	}])
 	.factory('linkOperationsService', ['requestService', function(requestService) {
@@ -401,6 +408,25 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
 					linkListOperationsService.deleteLinkList(linkListAccessKey, function(data){});
 					$linkList.remove();
+				});
+
+				$('.link-list p.share-link-list i').off().on('click', function(e) {
+					var clipboard = new Clipboard('.link-list p.share-link-list i', {
+						text: function(triggerElement) {
+							var $linkList = $(triggerElement).parent().parent();
+							var linkListAccessKey = $linkList.find('.link-list-access-key').text();
+							return linkListOperationsService.generateShareableLink(linkListAccessKey);
+						}
+					});
+
+					clipboard.on('success', function(e) {
+					    // console.info('Action:', e.action);
+					    // console.info('Text:', e.text);
+					    // console.info('Trigger:', e.trigger);
+    					// e.clearSelection();
+					});
+
+					clipboard.destroy();
 				});
 
 				$scope.$watch('editable', function() {
