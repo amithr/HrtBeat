@@ -37,7 +37,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.factory('assetsService', ['requestService', function(requestService){
+	.factory('assetsService', ['requestService', function(requestService) {
 		return {
 			addFontAwesomeStylesheet: function() {
 				$("head").append($("<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' />"));
@@ -45,6 +45,21 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			addMainStylesheets: function () {
 				$("head").append($("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css' type='text/css' media='screen' />"));
 				$("head").append($("<link rel='stylesheet' href='/static/main.css' type='text/css' media='screen' />"));
+			},
+			addNotificationStyle: function() {
+				$.notify.addStyle('standard', {
+					html: "<div><span data-notify-text/></div>",
+					classes: {
+						base: {
+							"white-space": "nowrap",
+							"background-color": "grey",
+							"color": "white",
+							"border-radius": "10px",
+							"opacity": "0.8",
+							"padding": "10px"
+						}
+					}
+				});
 			}
 		}
 	}])
@@ -191,21 +206,6 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			}
 		}
 	}])
-	.factory('validationService', ['requestService', function(requestService) {
-		return {
-			isLinkUrlValid: function(linkUrl) {
-			},
-			isLinkListAccessKeyValid: function(linkListAccessKey) {
-
-			},
-			showErrorFlashMessage: function(message) {
-
-			},
-			showSuccessFlashMessage: function(message) {
-
-			}
-		}
-	}])
 	.factory('userService', ['$location', '$cookies', 'requestService', function($location, $cookies, requestService) {
 		return {
 			logoutUser: function(params, callback) {
@@ -296,6 +296,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 	.controller('ControlPanelController', ['$scope', '$location', '$cookies', 'assetsService', 'userService', 'linkListOperationsService', function($scope, $location, $cookies, assetsService, userService, linkListOperationsService) {
 		assetsService.addMainStylesheets();
 		assetsService.addFontAwesomeStylesheet();
+		assetsService.addNotificationStyle();
 		$scope.isUserLoggedIn = userService.isUserLoggedIn();
 		$scope.linkListAccessKeyExists = false;
 		$scope.linkLists = [];
@@ -336,6 +337,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		$scope.links = [];
 		assetsService.addFontAwesomeStylesheet();
 		assetsService.addMainStylesheets();
+		assetsService.addNotificationStyle();
 		var linkListAccessKey = $routeParams.linkListAccessKey;
 
 		$scope.refreshLinkList = function() {
@@ -372,7 +374,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			$location.path('/');
 		}
 	}])
-	.directive('linklist', ['linkListOperationsService', function(linkListOperationsService) {
+	.directive('linklist', ['linkListOperationsService', 'assetsService', function(linkListOperationsService, assetsService) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -390,6 +392,8 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			'</div>'
 			,
 			link: function($scope, $http, element) {
+				assetsService.addNotificationStyle();
+
 				var getLinkListElements = function($linkList) {
 					var linkListElements = {};
 					linkListElements.linkListAccessKeyElement = $linkList.find('.link-list-access-key');
@@ -406,8 +410,13 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 				$('.link-list p.delete-link-list i').off().on('click', function(e) {
 					var $linkList = $(e.target).parent().parent();
 					var linkListAccessKey = $linkList.find('.link-list-access-key').text();
-					linkListOperationsService.deleteLinkList(linkListAccessKey, function(data){});
-					$linkList.remove();
+					linkListOperationsService.deleteLinkList(linkListAccessKey, function(data){
+						$linkList.remove();
+						$.notify('Link list deleted', {
+							style: "standard",
+							className: "base"
+						});
+					});
 				});
 
 				$('.link-list p.share-link-list i').off().on('click', function(e) {
@@ -420,13 +429,12 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					});
 
 					clipboard.on('success', function(e) {
-					    // console.info('Action:', e.action);
-					    // console.info('Text:', e.text);
-					    // console.info('Trigger:', e.trigger);
-    					// e.clearSelection();
+						$.notify('Link copied to clipboard', {
+							style: "standard",
+							className: "base"
+						});
+						clipboard.destroy();
 					});
-
-					clipboard.destroy();
 				});
 
 				$scope.$watch('editable', function() {
@@ -452,10 +460,18 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 						linkListElements['editableElement'].attr('data-is-link-list-editable', "false");
 						updateLinkListParameters.editable = false;
 						$currentElement.css('color', 'red');
+						$.notify('Link list is no longer publicly editable', {
+							style: "standard",
+							className: "base"
+						});
 					} else {
 						linkListElements['editableElement'].attr('data-is-link-list-editable', "true");
 						updateLinkListParameters.editable = true;
 						$currentElement.css('color', '#08e004');
+						$.notify('Link list is now publicly editable', {
+							style: "standard",
+							className: "base"
+						});
 					}
 					linkListOperationsService.updateLinkList(updateLinkListParameters, function(data){});
 				});
@@ -463,7 +479,7 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 		}
 
 	}])
-	.directive('link', ['linkOperationsService', 'linkListOperationsService', 'providersOperationsService', function(linkOperationsService, linkListOperationsService, providersOperationsService) {
+	.directive('link', ['linkOperationsService', 'linkListOperationsService', 'assetsService', 'providersOperationsService', function(linkOperationsService, linkListOperationsService, assetsService, providersOperationsService) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -487,6 +503,8 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 			'</div>'
 			,
 			link: function($scope, $http, element) {
+				assetsService.addNotificationStyle();
+
 				function getLinkData($link) {
 					var $linkContainer = $link.parent();
 					var link = {};
@@ -517,6 +535,10 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					var linkId = $linkContainer.attr('data-link-id');
 					linkOperationsService.deleteLink(linkId, function(data){
 						$linkContainer.remove();
+						$.notify('Link deleted', {
+							style: "standard",
+							className: "base"
+						});
 					});
 					e.preventDefault();
 				});
@@ -541,8 +563,16 @@ angular.module('hrtBeatApp', ['ngRoute', 'ngCookies'])
 					providersOperationsService.downloadSong(linkData, function(isDownloadPossible) {
 						if(!isDownloadPossible) {
 							$(e.target).parent().animate({ "border-color":"red"},"fast");
+							$.notify('This track cannot be downloaded', {
+								style: "standard",
+								className: "base"
+							});
 						} else {
 							$(e.target).parent().animate({ "border-color":"#08e004)"},"fast");
+							$.notify('A download link to this track has been sent to your email inbox', {
+								style: "standard",
+								className: "base"
+							});
 						}
 						$(e.target).parent().animate({ "border-color":"rgba(178, 178, 178, 0.3)"},3000);
 					});
